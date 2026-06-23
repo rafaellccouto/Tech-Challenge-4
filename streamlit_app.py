@@ -206,6 +206,10 @@ with tab1:
         # Normalizar e prever (captura de exceções)
         try:
             X_scaled = scaler.transform(df_input)
+            X_scaled = scaler.transform(df_input)
+            st.write("X_scaled (primeira linha):", X_scaled[0])
+            st.write("Média do scaler:", scaler.mean_)
+            st.write("Desvio padrão do scaler:", scaler.scale_)
             pred_encoded = model.predict(X_scaled)[0]
             prob = model.predict_proba(X_scaled)[0]
         except Exception as e:
