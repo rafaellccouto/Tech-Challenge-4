@@ -205,8 +205,9 @@ with tab1:
 
         # Normalizar e prever (captura de exceções)
         try:
-            X_scaled = scaler.transform(df_input)
-            X_scaled = scaler.transform(df_input)
+            X_scaled = (df_input.values - scaler.mean_) / scaler.scale_
+            st.write("df_input shape:", df_input.shape)            # deve ser (1, 30)
+            st.write("X_scaled shape:", X_scaled.shape)            # deve ser (1, 30)
             st.write("X_scaled (primeira linha):", X_scaled[0])
             st.write("Média do scaler:", scaler.mean_)
             st.write("Desvio padrão do scaler:", scaler.scale_)
