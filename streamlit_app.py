@@ -227,6 +227,7 @@ with tab1:
         # Expander com debug da predição (model.classes_, label_encoder, prob, BMI, df_input)
         with st.expander("🔍 Debug da predição (apenas dev)", expanded=False):
             st.write("BMI calculado:", round(bmi, 3))
+            st.write("Número de features do scaler:", scaler.mean_.shape[0])
             st.write("expected_cols:", expected_cols)
             st.write("df_input (colunas):", df_input.columns.tolist())
             st.write("df_input (valores):", df_input.iloc[0].to_dict())
