@@ -20,11 +20,15 @@ st.set_page_config(
 # ============================================================================
 @st.cache_resource
 def load_model():
-    model = joblib.load('models/best_obesity_model.pkl')
-    scaler = joblib.load('models/scaler.pkl')
-    label_encoder = joblib.load('models/label_encoder.pkl')
-    feature_names = joblib.load('models/feature_names.pkl')
-    return model, scaler, label_encoder, feature_names
+    try:
+        model = joblib.load('models/best_obesity_model.pkl')
+        scaler = joblib.load('models/scaler.pkl')
+        label_encoder = joblib.load('models/label_encoder.pkl')
+        feature_names = joblib.load('models/feature_names.pkl')
+        return model, scaler, label_encoder, feature_names
+    except Exception as e:
+        st.error("Erro ao carregar modelos: " + str(e))
+        return None, None, None, None
 
 model, scaler, label_encoder, feature_names = load_model()
 
@@ -60,10 +64,10 @@ with tab1:
     with col1:
         st.subheader("📋 Dados Pessoais")
         
-        gender = st.selectbox("Gênero", ["Female", "Male"], key="gender")
+        sexo = st.selectbox("Sexo", ["Feminino", "Masculino"], key="sexo")
         age = st.slider("Idade (anos)", 14, 61, 25)
         height = st.slider("Altura (metros)", 1.45, 1.98, 1.70, step=0.01)
-        weight = st.slider("Peso (kg)", 39, 173, 75, step=0.5)
+        weight = st.slider("Peso (kg)", 39.0, 173.0, 75.0, step=0.5)
         
     with col2:
         st.subheader("🍽️ Hábitos Alimentares")
@@ -102,10 +106,15 @@ with tab1:
     # PROCESSAMENTO E PREVISÃO
     # ========================================================================
     if st.button("🔮 Fazer Previsão", use_container_width=True, type="primary"):
-        
-        # Preparar dados
+
+        # Verifica se os modelos foram carregados corretamente
+        if model is None or scaler is None or label_encoder is None or feature_names is None:
+            st.error("Modelos não carregados. Verifique os arquivos em /models e os logs de carregamento.")
+            st.stop()
+
+        # Preparar dados (usar nomes compatíveis com feature_names do modelo)
         input_data = {
-            'Gender': 1 if gender == 'Male' else 0,
+            'Gender': 1 if sexo == 'Masculino' else 0,
             'Age': float(age),
             'Height': float(height),
             'Weight': float(weight),
@@ -132,38 +141,57 @@ with tab1:
             'CALC_Sometimes': 1 if calc == 'Sometimes' else 0,
             'CALC_no': 1 if calc == 'no' else 0,
         }
-        
+
         # Calcular features de engenharia
-        bmi = weight / (height ** 2)
-        faf_weight = faf * weight
-        age_family = age * (1 if family_history == 'yes' else 0)
-        weight_height_ratio = weight / height
-        
+        bmi = float(weight) / (float(height) ** 2)
+        faf_weight = int(faf) * float(weight)
+        age_family = float(age) * (1 if family_history == 'yes' else 0)
+        weight_height_ratio = float(weight) / float(height)
+
         input_data['BMI'] = bmi
         input_data['FAF_Weight'] = faf_weight
         input_data['Age_Family_History'] = age_family
         input_data['Weight_Height_Ratio'] = weight_height_ratio
-        
-        # Criar DataFrame
+
+        # Criar DataFrame e validar colunas
         df_input = pd.DataFrame([input_data])
-        df_input = df_input[feature_names]
-        
-        # Normalizar
-        X_scaled = scaler.transform(df_input)
-        
-        # Fazer previsão
-        pred_encoded = model.predict(X_scaled)[0]
-        prob = model.predict_proba(X_scaled)[0]
-        
-        # Decodificar
-        pred_label = label_encoder.inverse_transform([pred_encoded])[0]
-        conf = np.max(prob) * 100
-        
-        # Mostrar resultado
+
+        # Verifica se feature_names é iterável e contém strings
+        try:
+            expected_cols = list(feature_names)
+        except Exception:
+            st.error("feature_names inválido. Verifique o arquivo models/feature_names.pkl")
+            st.stop()
+
+        missing = [c for c in expected_cols if c not in df_input.columns]
+        if missing:
+            st.error(f"Faltam colunas no input: {missing}")
+            st.write("Colunas disponíveis no input:", df_input.columns.tolist())
+            st.stop()
+        else:
+            df_input = df_input[expected_cols]
+
+        # Normalizar e prever (captura de exceções)
+        try:
+            X_scaled = scaler.transform(df_input)
+            pred_encoded = model.predict(X_scaled)[0]
+            prob = model.predict_proba(X_scaled)[0]
+        except Exception as e:
+            st.error("Erro durante a predição: " + str(e))
+            st.stop()
+
+        # Decodificar e mostrar resultado
+        try:
+            pred_label = label_encoder.inverse_transform([pred_encoded])[0]
+        except Exception:
+            pred_label = str(pred_encoded)
+
+        conf = float(np.max(prob) * 100)
+
         st.divider()
-        
+
         col_pred1, col_pred2 = st.columns([2, 1])
-        
+
         with col_pred1:
             st.markdown(f"""
                 <div style='
@@ -178,25 +206,26 @@ with tab1:
                     <p style='font-size: 20px;'>Confiança: <strong>{conf:.1f}%</strong></p>
                 </div>
             """, unsafe_allow_html=True)
-        
+
         with col_pred2:
             st.markdown("### 📊 Probabilidades")
-            
+            try:
+                classes = list(label_encoder.classes_)
+            except Exception:
+                classes = [str(i) for i in range(len(prob))]
             prob_df = pd.DataFrame({
-                'Classe': label_encoder.classes_,
+                'Classe': classes,
                 'Probabilidade': prob
             }).sort_values('Probabilidade', ascending=False)
-            
+
             for idx, row in prob_df.iterrows():
                 st.write(f"**{row['Classe']}**: {row['Probabilidade']*100:.1f}%")
-        
+
         st.divider()
-        
-        # Dicas de saúde
+
+        # Dicas de saúde (mantém seu código)
         st.subheader("💡 Recomendações de Saúde")
-        
         recommendations = []
-        
         if bmi < 18.5:
             recommendations.append("⚠️ **Peso baixo**: Consulte um médico para avaliar deficiência nutricional")
         elif bmi < 25:
@@ -205,19 +234,16 @@ with tab1:
             recommendations.append("⚠️ **Sobrepeso**: Aumente atividade física e revise a alimentação")
         else:
             recommendations.append("🚨 **Obesidade**: Busque orientação médica profissional urgentemente")
-        
-        if faf < 1:
+
+        if int(faf) < 1:
             recommendations.append("🏃 Aumente atividade física para pelo menos 1x por semana")
-        
-        if ch2o < 2:
+        if int(ch2o) < 2:
             recommendations.append("💧 Aumente consumo de água para pelo menos 2L por dia")
-        
         if favc == "yes":
             recommendations.append("🍔 Reduza alimentos altamente calóricos")
-        
-        if fcvc < 3:
+        if int(fcvc) < 3:
             recommendations.append("🥗 Aumente consumo de vegetais nas refeições")
-        
+
         for rec in recommendations:
             st.info(rec)
 
@@ -263,7 +289,7 @@ with tab2:
     1. **BMI** (Índice de Massa Corporal) - ~30%
     2. **Weight_Height_Ratio** (Proporção Peso/Altura) - ~15%
     3. **Weight** (Peso) - ~10%
-    4. **Gender** (Gênero) - ~8%
+    4. **Sexo** (Sexo) - ~8%
     5. **Age_Family_History** (Idade × Histórico Familiar) - ~6%
     """)
     
@@ -365,7 +391,7 @@ with tab4:
     st.header("📖 Dicionário de Dados")
     
     data_dict = {
-        "Gender": "Gênero (Female/Male)",
+        "Sexo": "Sexo (Feminino/Masculino)",
         "Age": "Idade em anos (14-61)",
         "Height": "Altura em metros (1.45-1.98)",
         "Weight": "Peso em kg (39-173)",
