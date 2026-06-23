@@ -33,8 +33,8 @@ def load_model():
 model, scaler, label_encoder, feature_names = load_model()
 
 # Mostrar feature_names em um expander para debug (remova em produção)
-with st.expander("🔍 Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
-    st.write("feature_names:", feature_names)
+# with st.expander("🔍 Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
+#     st.write("feature_names:", feature_names)
 
 # ============================================================================
 # INTERFACE PRINCIPAL
@@ -207,11 +207,11 @@ with tab1:
         # Normalizar e prever (captura de exceções)
         try:
             X_raw = df_input.values   # shape (1, 30)
-            st.write("df_input shape:", df_input.shape)
-            st.write("X_raw shape:", X_raw.shape)
-            st.write("X_raw (primeira linha):", X_raw[0])
+            #st.write("df_input shape:", df_input.shape)
+            #st.write("X_raw shape:", X_raw.shape)
+            #st.write("X_raw (primeira linha):", X_raw[0])
             #X_scaled = (df_input.values - scaler.mean_) / scaler.scale_
-            st.write("df_input shape:", df_input.shape)            # deve ser (1, 30)
+            #st.write("df_input shape:", df_input.shape)            # deve ser (1, 30)
             #st.write("X_scaled shape:", X_scaled.shape)            # deve ser (1, 30)
             #st.write("X_scaled (primeira linha):", X_scaled[0])
             #st.write("Média do scaler:", scaler.mean_)
@@ -233,18 +233,18 @@ with tab1:
         conf = float(np.max(prob) * 100)
 
         # Expander com debug da predição (model.classes_, label_encoder, prob, BMI, df_input)
-        with st.expander("🔍 Debug da predição (apenas dev)", expanded=False):
-            st.write("BMI calculado:", round(bmi, 3))
-            st.write("Número de features do scaler:", scaler.mean_.shape[0])
-            st.write("expected_cols:", expected_cols)
-            st.write("df_input (colunas):", df_input.columns.tolist())
-            st.write("df_input (valores):", df_input.iloc[0].to_dict())
-            st.write("model.classes_ (codificadas):", getattr(model, "classes_", None))
-            try:
-                st.write("label_encoder.classes_ (nomes):", list(label_encoder.classes_))
-            except Exception:
-                st.write("label_encoder sem classes_")
-            st.write("prob array:", prob.tolist())
+        # with st.expander("🔍 Debug da predição (apenas dev)", expanded=False):
+        #     st.write("BMI calculado:", round(bmi, 3))
+        #     st.write("Número de features do scaler:", scaler.mean_.shape[0])
+        #     st.write("expected_cols:", expected_cols)
+        #     st.write("df_input (colunas):", df_input.columns.tolist())
+        #     st.write("df_input (valores):", df_input.iloc[0].to_dict())
+        #     st.write("model.classes_ (codificadas):", getattr(model, "classes_", None))
+        #     try:
+        #         st.write("label_encoder.classes_ (nomes):", list(label_encoder.classes_))
+        #     except Exception:
+        #         st.write("label_encoder sem classes_")
+        #     st.write("prob array:", prob.tolist())
 
         st.divider()
 
