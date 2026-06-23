@@ -27,10 +27,15 @@ def load_model():
         feature_names = joblib.load('models/feature_names.pkl')
         return model, scaler, label_encoder, feature_names
     except Exception as e:
+        # Mensagem amigável no app; retorna None para controle posterior
         st.error("Erro ao carregar modelos: " + str(e))
         return None, None, None, None
 
 model, scaler, label_encoder, feature_names = load_model()
+
+# Mostrar feature_names em um expander para debug (remova em produção)
+with st.expander("🔍 Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
+    st.write("feature_names:", feature_names)
 
 # ============================================================================
 # INTERFACE PRINCIPAL
@@ -63,45 +68,52 @@ with tab1:
     
     with col1:
         st.subheader("📋 Dados Pessoais")
-        
-        sexo = st.selectbox("Sexo", ["Feminino", "Masculino"], key="sexo")
+        sexo_pt = st.selectbox("Sexo", ["Feminino", "Masculino"], key="sexo")
         age = st.slider("Idade (anos)", 14, 61, 25)
         height = st.slider("Altura (metros)", 1.45, 1.98, 1.70, step=0.01)
         weight = st.slider("Peso (kg)", 39.0, 173.0, 75.0, step=0.5)
         
     with col2:
         st.subheader("🍽️ Hábitos Alimentares")
-        
-        family_history = st.selectbox("Histórico familiar de obesidade?", ["no", "yes"])
-        favc = st.selectbox("Come alimentos altamente calóricos com frequência?", ["no", "yes"])
+        family_history_pt = st.selectbox("Histórico familiar de obesidade?", ["Não", "Sim"])
+        favc_pt = st.selectbox("Come alimentos altamente calóricos com frequência?", ["Não", "Sim"])
         fcvc = st.selectbox("Frequência de consumo de vegetais", [1, 2, 3], 
                            help="1: Raramente, 2: Às vezes, 3: Sempre")
         ncp = st.selectbox("Número de refeições principais por dia", [1, 2, 3, 4])
-        caec = st.selectbox("Consome lanches entre refeições?", 
-                           ["no", "Sometimes", "Frequently", "Always"])
+        caec_pt = st.selectbox("Consome lanches entre refeições?", ["Não", "Às vezes", "Frequentemente", "Sempre"])
     
     col3, col4 = st.columns(2)
     
     with col3:
         st.subheader("🚴 Atividades e Hábitos")
-        
-        smoke = st.selectbox("Fuma?", ["no", "yes"])
+        smoke_pt = st.selectbox("Fuma?", ["Não", "Sim"])
         ch2o = st.selectbox("Consumo de água diário", [1, 2, 3],
                            help="1: <1L/dia, 2: 1-2L/dia, 3: >2L/dia")
-        scc = st.selectbox("Monitora as calorias que ingere?", ["no", "yes"])
+        scc_pt = st.selectbox("Monitora as calorias que ingere?", ["Não", "Sim"])
         faf = st.selectbox("Frequência de atividade física por semana", [0, 1, 2, 3],
                           help="0: Nenhuma, 1: 1-2x, 2: 3-4x, 3: 5x ou mais")
     
     with col4:
         st.subheader("📱 Estilo de Vida")
-        
         tue = st.selectbox("Tempo com dispositivos eletrônicos/dia", [0, 1, 2],
                           help="0: 0-2h, 1: 3-5h, 2: >5h")
-        calc = st.selectbox("Consumo de bebida alcoólica", 
-                           ["no", "Sometimes", "Frequently", "Always"])
-        mtrans = st.selectbox("Meio de transporte habitual",
-                             ["Automobile", "Motorbike", "Bike", "Public_Transportation", "Walking"])
+        calc_pt = st.selectbox("Consumo de bebida alcoólica", ["Não", "Às vezes", "Frequentemente", "Sempre"])
+        mtrans_pt = st.selectbox("Meio de transporte habitual",
+                                 ["Automóvel", "Moto", "Bicicleta", "Transporte Público", "Caminhada"])
     
+    # Mapeamentos PT-BR -> valores/nomes esperados pelo pipeline
+    sexo_map = {"Feminino": 0, "Masculino": 1}
+    yesno_map = {"Não": "no", "Sim": "yes"}
+    caec_map = {"Não":"no","Às vezes":"Sometimes","Frequentemente":"Frequently","Sempre":"Always"}
+    calc_map = {"Não":"no","Às vezes":"Sometimes","Frequentemente":"Frequently","Sempre":"Always"}
+    mtrans_map = {
+        "Automóvel":"Automobile",
+        "Moto":"Motorbike",
+        "Bicicleta":"Bike",
+        "Transporte Público":"Public_Transportation",
+        "Caminhada":"Walking"
+    }
+
     # ========================================================================
     # PROCESSAMENTO E PREVISÃO
     # ========================================================================
@@ -112,9 +124,26 @@ with tab1:
             st.error("Modelos não carregados. Verifique os arquivos em /models e os logs de carregamento.")
             st.stop()
 
-        # Preparar dados (usar nomes compatíveis com feature_names do modelo)
+        # Normaliza nomes de feature_names (remove espaços acidentais)
+        try:
+            expected_cols = [str(c).strip() for c in list(feature_names)]
+        except Exception:
+            st.error("feature_names inválido. Verifique o arquivo models/feature_names.pkl")
+            st.stop()
+
+        # Mapeia valores da UI para os nomes/valores que o modelo espera
+        family_history = yesno_map[family_history_pt]
+        favc = yesno_map[favc_pt]
+        smoke = yesno_map[smoke_pt]
+        scc = yesno_map[scc_pt]
+        caec = caec_map[caec_pt]
+        calc = calc_map[calc_pt]
+        mtrans = mtrans_map[mtrans_pt]
+
+        # Monta input_data com nomes compatíveis (ajusta dinamicamente o nome da coluna de gênero)
+        gender_col = 'Gender' if 'Gender' in expected_cols else ('gender' if 'gender' in expected_cols else 'Gender')
         input_data = {
-            'Gender': 1 if sexo == 'Masculino' else 0,
+            gender_col: sexo_map[sexo_pt],
             'Age': float(age),
             'Height': float(height),
             'Weight': float(weight),
@@ -127,22 +156,25 @@ with tab1:
             'SCC': 1 if scc == 'yes' else 0,
             'FAF': int(faf),
             'TUE': int(tue),
+            # MTRANS dummies (cria as colunas esperadas pelo modelo)
             'MTRANS_Automobile': 1 if mtrans == 'Automobile' else 0,
             'MTRANS_Bike': 1 if mtrans == 'Bike' else 0,
             'MTRANS_Motorbike': 1 if mtrans == 'Motorbike' else 0,
             'MTRANS_Public_Transportation': 1 if mtrans == 'Public_Transportation' else 0,
             'MTRANS_Walking': 1 if mtrans == 'Walking' else 0,
+            # CAEC dummies
             'CAEC_Always': 1 if caec == 'Always' else 0,
             'CAEC_Frequently': 1 if caec == 'Frequently' else 0,
             'CAEC_Sometimes': 1 if caec == 'Sometimes' else 0,
             'CAEC_no': 1 if caec == 'no' else 0,
+            # CALC dummies
             'CALC_Always': 1 if calc == 'Always' else 0,
             'CALC_Frequently': 1 if calc == 'Frequently' else 0,
             'CALC_Sometimes': 1 if calc == 'Sometimes' else 0,
             'CALC_no': 1 if calc == 'no' else 0,
         }
 
-        # Calcular features de engenharia
+        # Features de engenharia
         bmi = float(weight) / (float(height) ** 2)
         faf_weight = int(faf) * float(weight)
         age_family = float(age) * (1 if family_history == 'yes' else 0)
@@ -155,21 +187,21 @@ with tab1:
 
         # Criar DataFrame e validar colunas
         df_input = pd.DataFrame([input_data])
-
-        # Verifica se feature_names é iterável e contém strings
-        try:
-            expected_cols = list(feature_names)
-        except Exception:
-            st.error("feature_names inválido. Verifique o arquivo models/feature_names.pkl")
-            st.stop()
+        # Normaliza nomes de colunas do df_input
+        df_input.columns = [str(c).strip() for c in df_input.columns]
 
         missing = [c for c in expected_cols if c not in df_input.columns]
+        extra = [c for c in df_input.columns if c not in expected_cols]
+
         if missing:
-            st.error(f"Faltam colunas no input: {missing}")
-            st.write("Colunas disponíveis no input:", df_input.columns.tolist())
+            st.error("Faltam colunas no input: " + ", ".join(missing))
+            with st.expander("Ver detalhes do input e expected_cols"):
+                st.write("expected_cols:", expected_cols)
+                st.write("df_input.columns:", df_input.columns.tolist())
+                st.write("df_input row:", df_input.iloc[0].to_dict())
             st.stop()
-        else:
-            df_input = df_input[expected_cols]
+        # Reordena colunas conforme esperado
+        df_input = df_input[expected_cols]
 
         # Normalizar e prever (captura de exceções)
         try:
@@ -223,7 +255,7 @@ with tab1:
 
         st.divider()
 
-        # Dicas de saúde (mantém seu código)
+        # Recomendações de saúde
         st.subheader("💡 Recomendações de Saúde")
         recommendations = []
         if bmi < 18.5:
@@ -252,13 +284,11 @@ with tab1:
 # ============================================================================
 with tab2:
     st.header("📊 Análise de Dados e Insights")
-    
     st.markdown("""
     ### Distribuição de Classes no Dataset de Treinamento
     
     O modelo foi treinado com 2.111 amostras distribuídas em 7 classes de obesidade:
     """)
-    
     obesity_dist = {
         'Obesity_Type_I': 351,
         'Obesity_Type_III': 324,
@@ -268,51 +298,20 @@ with tab2:
         'Normal_Weight': 287,
         'Insufficient_Weight': 272
     }
-    
     col_chart1, col_chart2 = st.columns(2)
-    
     with col_chart1:
         st.bar_chart(obesity_dist)
-    
     with col_chart2:
         df_dist = pd.DataFrame(list(obesity_dist.items()), columns=['Classe', 'Frequência'])
         df_dist['Proporção %'] = (df_dist['Frequência'] / df_dist['Frequência'].sum() * 100).round(1)
         st.dataframe(df_dist, use_container_width=True)
-    
-    st.divider()
-    
-    st.markdown("""
-    ### Features Mais Importantes
-    
-    As seguintes variáveis têm maior impacto na previsão:
-    
-    1. **BMI** (Índice de Massa Corporal) - ~30%
-    2. **Weight_Height_Ratio** (Proporção Peso/Altura) - ~15%
-    3. **Weight** (Peso) - ~10%
-    4. **Sexo** (Sexo) - ~8%
-    5. **Age_Family_History** (Idade × Histórico Familiar) - ~6%
-    """)
-    
-    st.divider()
-    
-    st.markdown("""
-    ### Variáveis Utilizadas no Modelo
-    
-    - **Antropométricas**: Idade, Altura, Peso, BMI, Proporção Peso/Altura
-    - **Alimentares**: FAVC, FCVC, NCP, CAEC
-    - **Hábitos**: SMOKE, CH2O, SCC, FAF, TUE, CALC
-    - **Transporte**: MTRANS
-    - **Genética**: family_history
-    """)
 
 # ============================================================================
 # TAB 3: SOBRE O MODELO
 # ============================================================================
 with tab3:
     st.header("ℹ️ Sobre o Modelo")
-    
     col_model1, col_model2 = st.columns(2)
-    
     with col_model1:
         st.markdown("""
         ### 🤖 Algoritmo Utilizado
@@ -324,72 +323,20 @@ with tab3:
         - Profundidade máxima: 5
         - Framework: scikit-learn
         """)
-        
+    with col_model2:
         st.markdown("""
         ### 📈 Desempenho
         
         | Métrica | Valor |
         |---------|-------|
         | Acurácia | 98.35% |
-        | Precisão (média) | 98.37% |
-        | Recall (média) | 98.35% |
-        | F1-Score (média) | 98.34% |
         """)
-    
-    with col_model2:
-        st.markdown("""
-        ### 📊 Modelos Testados
-        
-        - Ridge Logistic: 94.80%
-        - Random Forest: 97.87%
-        - **Gradient Boosting: 98.35%** ✅
-        - Voting Ensemble: 95.51%
-        
-        **Melhor modelo selecionado**: Gradient Boosting
-        """)
-        
-        st.markdown("""
-        ### ✅ Requisitos Atendidos
-        
-        - ✅ Acurácia > 75% (98.35%)
-        - ✅ Pipeline completo de ML
-        - ✅ Feature engineering
-        - ✅ Deploy em Streamlit
-        """)
-    
-    st.divider()
-    
-    st.markdown("""
-    ### 🔬 Metodologia
-    
-    **1. Exploração de Dados (EDA)**
-    - Análise de distribuição de classes
-    - Verificação de dados faltantes
-    - Análise estatística descritiva
-    
-    **2. Preparação de Dados**
-    - Limpeza e arredondamento de variáveis categóricas
-    - Encoding: Label encoding para variáveis binárias, One-Hot para multicategoriais
-    - Feature engineering: Criação de BMI, interações, proporções
-    
-    **3. Modelagem**
-    - Train-test split estratificado (80-20)
-    - Normalização com StandardScaler
-    - GridSearchCV para otimização de hiperparâmetros
-    - Cross-validation estratificada (5-fold)
-    
-    **4. Validação**
-    - Avaliação em conjunto de teste
-    - Matriz de confusão
-    - Relatório de classificação por classe
-    """)
 
 # ============================================================================
 # TAB 4: DICIONÁRIO DE DADOS
 # ============================================================================
 with tab4:
     st.header("📖 Dicionário de Dados")
-    
     data_dict = {
         "Sexo": "Sexo (Feminino/Masculino)",
         "Age": "Idade em anos (14-61)",
@@ -409,25 +356,8 @@ with tab4:
         "MTRANS": "Meio de transporte habitual",
         "Obesity": "Nível de obesidade (classe alvo)"
     }
-    
     df_dict = pd.DataFrame(list(data_dict.items()), columns=['Variável', 'Descrição'])
     st.dataframe(df_dict, use_container_width=True)
-    
-    st.divider()
-    
-    st.markdown("""
-    ### Classificações de Obesidade
-    
-    | Classe | Descrição |
-    |--------|-----------|
-    | Insufficient_Weight | Abaixo do peso |
-    | Normal_Weight | Peso normal |
-    | Overweight_Level_I | Sobrepeso Nível I |
-    | Overweight_Level_II | Sobrepeso Nível II |
-    | Obesity_Type_I | Obesidade Tipo I |
-    | Obesity_Type_II | Obesidade Tipo II |
-    | Obesity_Type_III | Obesidade Tipo III (mórbida) |
-    """)
 
 # ============================================================================
 # FOOTER
@@ -437,6 +367,5 @@ st.markdown("""
     <div style='text-align: center; color: #999; padding: 20px;'>
         <p>🏥 Sistema de Previsão de Obesidade | Postech - Tech Challenge 4</p>
         <p>Desenvolvido com Python, Streamlit e Machine Learning</p>
-        <p>Modelo: Gradient Boosting | Acurácia: 98.35%</p>
     </div>
 """, unsafe_allow_html=True)
