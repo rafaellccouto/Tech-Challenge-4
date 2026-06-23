@@ -21,7 +21,7 @@ COMPONENTES ENTREGÁVEIS:
    - Dataset: 2.111 amostras, 7 classes
    
 2. 💻 APLICAÇÃO STREAMLIT (DEPLOY)
-   URL: [INSERIR URL DA APLICAÇÃO]
+   URL: https://tech-challenge-4-previsao-obesidade.streamlit.app/
    
    Funcionalidades:
    - Previsão interativa em tempo real
@@ -42,7 +42,7 @@ COMPONENTES ENTREGÁVEIS:
    - Recomendações para equipe médica
 
 4. 📁 REPOSITÓRIO GITHUB
-   URL: [INSERIR URL DO REPOSITÓRIO]
+   URL: https://github.com/rafaellccouto/Tech-Challenge-4
    
    Arquivos inclusos:
    - 01_ML_Pipeline_Obesity_Prediction.ipynb
@@ -228,7 +228,7 @@ Passos:
 5. Defina main file: streamlit_app.py
 6. Deploy automático
 
-URL DO APP: [INSERIR URL APÓS DEPLOY]
+URL DO APP: https://tech-challenge-4-previsao-obesidade.streamlit.app/
 
 OPÇÃO 2: DEPLOY EM AWS
 - EC2 instance (t2.micro)
@@ -300,8 +300,8 @@ REQUISITOS DO DESAFIO:
     → Recomendações de protocolo clínico
 
 [✓] Links de compartilhamento
-    → GitHub repository: [URL]
-    → Streamlit App: [URL]
+    → GitHub repository: https://github.com/rafaellccouto/Tech-Challenge-4
+    → Streamlit App: https://tech-challenge-4-previsao-obesidade.streamlit.app/
     → Dashboard: [URL]
 
 ================================================================================

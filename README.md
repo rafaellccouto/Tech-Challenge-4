@@ -279,9 +279,9 @@ Dataset (2111 amostras)
 ## 🔗 Links de Deploy (Placeholder)
 
 *Após deploy, adicionar aqui:*
-- 🌐 **App Streamlit**: [URL do app]
+- 🌐 **App Streamlit**: https://tech-challenge-4-previsao-obesidade.streamlit.app/
 - 📊 **Dashboard Analítico**: [URL do painel]
-- 💻 **Repositório GitHub**: [URL do repo]
+- 💻 **Repositório GitHub**: https://github.com/rafaellccouto/Tech-Challenge-4
 
 ## 📄 Arquivos de Entrega
 
