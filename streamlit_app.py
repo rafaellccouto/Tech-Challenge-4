@@ -27,7 +27,6 @@ def load_model():
         feature_names = joblib.load('models/feature_names.pkl')
         return model, scaler, label_encoder, feature_names
     except Exception as e:
-        # Mensagem amigável no app; retorna None para controle posterior
         st.error("Erro ao carregar modelos: " + str(e))
         return None, None, None, None
 
@@ -200,6 +199,7 @@ with tab1:
                 st.write("df_input.columns:", df_input.columns.tolist())
                 st.write("df_input row:", df_input.iloc[0].to_dict())
             st.stop()
+
         # Reordena colunas conforme esperado
         df_input = df_input[expected_cols]
 
@@ -219,6 +219,18 @@ with tab1:
             pred_label = str(pred_encoded)
 
         conf = float(np.max(prob) * 100)
+
+        # Expander com debug da predição (model.classes_, label_encoder, prob, BMI, df_input)
+        with st.expander("🔍 Debug da predição (apenas dev)", expanded=False):
+            st.write("BMI calculado:", round(bmi, 3))
+            st.write("df_input (colunas):", df_input.columns.tolist())
+            st.write("df_input (valores):", df_input.iloc[0].to_dict())
+            st.write("model.classes_ (codificadas):", getattr(model, "classes_", None))
+            try:
+                st.write("label_encoder.classes_ (nomes):", list(label_encoder.classes_))
+            except Exception:
+                st.write("label_encoder sem classes_")
+            st.write("prob array:", prob.tolist())
 
         st.divider()
 
@@ -241,10 +253,16 @@ with tab1:
 
         with col_pred2:
             st.markdown("### 📊 Probabilidades")
+            # --- Alinha probabilidades com os rótulos corretos ---
             try:
-                classes = list(label_encoder.classes_)
+                encoded_model_classes = getattr(model, "classes_", None)
+                if encoded_model_classes is not None:
+                    classes = list(label_encoder.inverse_transform(encoded_model_classes))
+                else:
+                    classes = list(label_encoder.classes_)
             except Exception:
                 classes = [str(i) for i in range(len(prob))]
+
             prob_df = pd.DataFrame({
                 'Classe': classes,
                 'Probabilidade': prob
