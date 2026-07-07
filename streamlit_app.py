@@ -86,16 +86,48 @@ with tab1:
     with col3:
         st.subheader("🚴 Atividades e Hábitos")
         smoke_pt = st.selectbox("Fuma?", ["Não", "Sim"])
-        ch2o = st.selectbox("Consumo de água diário", [1, 2, 3],
-                           help="1: <1L/dia, 2: 1-2L/dia, 3: >2L/dia")
+
+        water_options = {
+            1: "1 - Menos de 1 litro por dia",
+            2: "2 - Entre 1 e 2 litros por dia",
+            3: "3 - Mais de 2 litros por dia"
+        }
+        ch2o = st.selectbox(
+            "Consumo diário de água (litros por dia)",
+            options=list(water_options.keys()),
+            format_func=lambda x: water_options[x],
+            help="Selecione a faixa aproximada de litros de água que você bebe por dia."
+        )
+
         scc_pt = st.selectbox("Monitora as calorias que ingere?", ["Não", "Sim"])
-        faf = st.selectbox("Frequência de atividade física por semana", [0, 1, 2, 3],
-                          help="0: Nenhuma, 1: 1-2x, 2: 3-4x, 3: 5x ou mais")
+
+        faf_options = {
+            0: "0 - Nenhuma",
+            1: "1 - 1 a 2 vezes por semana",
+            2: "2 - 3 a 4 vezes por semana",
+            3: "3 - 5 ou mais vezes por semana"
+        }
+        faf = st.selectbox(
+            "Frequência de atividade física por semana (número de vezes)",
+            options=list(faf_options.keys()),
+            format_func=lambda x: faf_options[x],
+            help="Escolha quantas vezes por semana você pratica atividade física."
+        )
     
     with col4:
         st.subheader("📱 Estilo de Vida")
-        tue = st.selectbox("Tempo com dispositivos eletrônicos/dia", [0, 1, 2],
-                          help="0: 0-2h, 1: 3-5h, 2: >5h")
+
+        screen_time_options = {
+            0: "0 - Até 2 horas por dia",
+            1: "1 - Entre 3 e 5 horas por dia",
+            2: "2 - Mais de 5 horas por dia"
+        }
+        tue = st.selectbox(
+            "Tempo com dispositivos eletrônicos por dia (horas)",
+            options=list(screen_time_options.keys()),
+            format_func=lambda x: screen_time_options[x],
+            help="Selecione a faixa de horas diárias que você costuma usar dispositivos eletrônicos."
+        )
         calc_pt = st.selectbox("Consumo de bebida alcoólica", ["Não", "Às vezes", "Frequentemente", "Sempre"])
         mtrans_pt = st.selectbox("Meio de transporte habitual",
                                  ["Automóvel", "Moto", "Bicicleta", "Transporte Público", "Caminhada"])
