@@ -76,8 +76,18 @@ with tab1:
         st.subheader("🍽️ Hábitos Alimentares")
         family_history_pt = st.selectbox("Histórico familiar de obesidade?", ["Não", "Sim"])
         favc_pt = st.selectbox("Come alimentos altamente calóricos com frequência?", ["Não", "Sim"])
-        fcvc = st.selectbox("Frequência de consumo de vegetais", [1, 2, 3], 
-                           help="1: Raramente, 2: Às vezes, 3: Sempre")
+
+        vegetable_options = {
+            1: "1 - Raramente",
+            2: "2 - Às vezes",
+            3: "3 - Sempre"
+        }
+        fcvc = st.selectbox(
+            "Frequência de consumo de vegetais",
+            options=list(vegetable_options.keys()),
+            format_func=lambda x: vegetable_options[x],
+            help="Selecione com que frequência você costuma comer vegetais nas refeições."
+        )
         ncp = st.selectbox("Número de refeições principais por dia", [1, 2, 3, 4])
         caec_pt = st.selectbox("Consome lanches entre refeições?", ["Não", "Às vezes", "Frequentemente", "Sempre"])
     
@@ -262,6 +272,17 @@ with tab1:
         except Exception:
             pred_label = str(pred_encoded)
 
+        class_name_map = {
+            "Overweight_Level_I": "Sobrepeso Nível I",
+            "Overweight_Level_II": "Sobrepeso Nível II",
+            "Obesity_Type_I": "Obesidade Tipo I",
+            "Obesity_Type_II": "Obesidade Tipo II",
+            "Obesity_Type_III": "Obesidade Tipo III",
+            "Normal_Weight": "Peso Normal",
+            "Insufficient_Weight": "Peso Insuficiente"
+        }
+        pred_label_display = class_name_map.get(pred_label, pred_label)
+
         conf = float(np.max(prob) * 100)
 
         # Expander com debug da predição (model.classes_, label_encoder, prob, BMI, df_input)
@@ -292,7 +313,7 @@ with tab1:
                     color: white;
                 '>
                     <h2>Classificação Prevista</h2>
-                    <h1 style='font-size: 48px; margin: 20px 0;'>{pred_label}</h1>
+                    <h1 style='font-size: 48px; margin: 20px 0;'>{pred_label_display}</h1>
                     <p style='font-size: 20px;'>Confiança: <strong>{conf:.1f}%</strong></p>
                 </div>
             """, unsafe_allow_html=True)
@@ -309,8 +330,10 @@ with tab1:
             except Exception:
                 classes = [str(i) for i in range(len(prob))]
 
+            classes_display = [class_name_map.get(cl, cl) for cl in classes]
+
             prob_df = pd.DataFrame({
-                'Classe': classes,
+                'Classe': classes_display,
                 'Probabilidade': prob
             }).sort_values('Probabilidade', ascending=False)
 
