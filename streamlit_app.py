@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 # CONFIGURAÇÃO DA PÁGINA
 # ============================================================================
 st.set_page_config(
-    page_title="🏥 Previsão de Obesidade",
+    page_title="Previsão de Obesidade",
     page_icon="⚕️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -33,7 +33,7 @@ def load_model():
 model, scaler, label_encoder, feature_names = load_model()
 
 # Mostrar feature_names em um expander para debug (remova em produção)
-# with st.expander("🔍 Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
+# with st.expander("Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
 #     st.write("feature_names:", feature_names)
 
 # ============================================================================
@@ -41,7 +41,7 @@ model, scaler, label_encoder, feature_names = load_model()
 # ============================================================================
 st.markdown("""
     <div style='text-align: center; padding: 20px;'>
-        <h1>🏥 Sistema de Previsão de Obesidade</h1>
+        <h1>Sistema de Previsão de Obesidade</h1>
         <p style='font-size: 18px; color: #666;'>
             Modelo de Machine Learning para auxiliar no diagnóstico de Obesidade
         </p>
@@ -54,14 +54,14 @@ st.divider()
 # TABS PARA NAVEGAÇÃO
 # ============================================================================
 tab1, tab2, tab3, tab4 = st.tabs(
-    ["🔮 Previsão", "📊 Análise de Dados", "ℹ️ Sobre o Modelo", "📖 Dicionário"]
+    ["Previsão", "📊 Análise de Dados", "ℹ️ Sobre o Modelo", "📖 Dicionário"]
 )
 
 # ============================================================================
 # TAB 1: PREVISÃO
 # ============================================================================
 with tab1:
-    st.header("🔮 Faça uma Previsão")
+    st.header("Faça uma Previsão")
     
     col1, col2 = st.columns(2)
     
@@ -158,7 +158,7 @@ with tab1:
     # ========================================================================
     # PROCESSAMENTO E PREVISÃO
     # ========================================================================
-    if st.button("🔮 Fazer Previsão", use_container_width=True, type="primary"):
+    if st.button("Fazer Previsão", use_container_width=True, type="primary"):
 
         # Verifica se os modelos foram carregados corretamente
         if model is None or scaler is None or label_encoder is None or feature_names is None:
