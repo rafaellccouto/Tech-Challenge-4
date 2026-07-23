@@ -452,7 +452,7 @@ with tab4:
 st.divider()
 st.markdown("""
     <div style='text-align: center; color: #999; padding: 20px;'>
-        <p>🏥 Sistema de Previsão de Obesidade | Postech - Tech Challenge 4</p>
+        <p>Sistema de Previsão de Obesidade | Postech - Tech Challenge 4</p>
         <p>Desenvolvido com Python, Streamlit e Machine Learning</p>
     </div>
 """, unsafe_allow_html=True)
