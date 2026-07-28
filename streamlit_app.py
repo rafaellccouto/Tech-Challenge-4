@@ -19,19 +19,84 @@ st.set_page_config(
 # ============================================================================
 # CARREGAMENTO DE MODELOS E PREPROCESSADORES
 # ============================================================================
+BASE_DIR = Path(__file__).resolve().parent
+MODELS_DIR = BASE_DIR / 'models'
+DATA_PATH = BASE_DIR / 'Dados_base' / 'Obesity.csv'
+
+
+def train_fallback_model():
+    import pandas as pd
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+    df = pd.read_csv(DATA_PATH)
+    df = df.dropna().copy()
+
+    X = df.drop(columns=['Obesity', 'Height', 'Weight'])
+    y = df['Obesity']
+
+    binary_map = {'yes': 1, 'no': 0}
+    for col in ['family_history', 'FAVC', 'SMOKE', 'SCC']:
+        X[col] = X[col].map(binary_map)
+
+    X['Gender'] = X['Gender'].map({'Female': 0, 'Male': 1})
+
+    X = pd.get_dummies(
+        X,
+        columns=['CAEC', 'CALC', 'MTRANS'],
+        prefix=['CAEC', 'CALC', 'MTRANS'],
+        drop_first=False,
+    )
+
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y)
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    model = LogisticRegression(
+        penalty='l2',
+        solver='lbfgs',
+        max_iter=2000,
+        random_state=42,
+    )
+    model.fit(X_scaled, y_encoded)
+
+    feature_names = X.columns.tolist()
+    metadata = {
+        'best_model_name': 'Logistic Regression (fallback)',
+        'best_accuracy': None,
+        'models': {},
+    }
+
+    joblib.dump(model, MODELS_DIR / 'best_obesity_model.pkl')
+    joblib.dump(scaler, MODELS_DIR / 'scaler.pkl')
+    joblib.dump(label_encoder, MODELS_DIR / 'label_encoder.pkl')
+    joblib.dump(feature_names, MODELS_DIR / 'feature_names.pkl')
+    joblib.dump(metadata, MODELS_DIR / 'model_metadata.pkl')
+
+    return model, scaler, label_encoder, feature_names, metadata
+
+
 @st.cache_resource
 def load_model():
     try:
-        model = joblib.load('models/best_obesity_model.pkl')
-        scaler = joblib.load('models/scaler.pkl')
-        label_encoder = joblib.load('models/label_encoder.pkl')
-        feature_names = joblib.load('models/feature_names.pkl')
-        metadata_path = Path('models/model_metadata.pkl')
+        model = joblib.load(MODELS_DIR / 'best_obesity_model.pkl')
+        scaler = joblib.load(MODELS_DIR / 'scaler.pkl')
+        label_encoder = joblib.load(MODELS_DIR / 'label_encoder.pkl')
+        feature_names = joblib.load(MODELS_DIR / 'feature_names.pkl')
+        metadata_path = MODELS_DIR / 'model_metadata.pkl'
         metadata = joblib.load(metadata_path) if metadata_path.exists() else None
         return model, scaler, label_encoder, feature_names, metadata
     except Exception as e:
-        st.error("Erro ao carregar modelos: " + str(e))
-        return None, None, None, None, None
+        st.warning("Modelo salvo incompatível; reconstruindo o modelo para esta execução.")
+        try:
+            return train_fallback_model()
+        except Exception as rebuild_error:
+            st.error("Erro ao carregar modelos: " + str(e))
+            st.error("Erro ao reconstruir modelo: " + str(rebuild_error))
+            return None, None, None, None, None
+
 
 model, scaler, label_encoder, feature_names, metadata = load_model()
 
