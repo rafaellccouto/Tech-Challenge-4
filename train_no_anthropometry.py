@@ -18,15 +18,14 @@ def load_data():
     df = pd.read_csv(DATA_PATH)
     df = df.dropna().copy()
 
-    X = df.drop(columns=['Obesity', 'Height', 'Weight'])
+    X = df.drop(columns=['Obesity', 'Height', 'Weight', 'Gender'])
     y = df['Obesity']
 
     binary_map = {'yes': 1, 'no': 0}
     for col in ['family_history', 'FAVC', 'SMOKE', 'SCC']:
         X[col] = X[col].map(binary_map)
 
-    X['Gender'] = X['Gender'].map({'Female': 0, 'Male': 1})
-
+    
     X = pd.get_dummies(
         X,
         columns=['CAEC', 'CALC', 'MTRANS'],
