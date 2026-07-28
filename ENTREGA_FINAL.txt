@@ -7,22 +7,19 @@ Postech - Fase 4
 ================================================================================
 
 Desenvolvido um sistema completo de Machine Learning para previsão de obesidade,
-com acurácia de 98.35% (superando o target de 75%).
+com acurácia de 86.29% no modelo final sem antropometria, usando hábitos e histórico familiar.
 
 COMPONENTES ENTREGÁVEIS:
 
 1. 🤖 MODELO DE ML
-   - Algoritmo: Gradient Boosting Classifier
-   - Acurácia: 98.35%
-   - Precisão: 98.37%
-   - Recall: 98.35%
-   - F1-Score: 98.34%
-   - Tempo de treinamento: ~12 segundos
+   - Algoritmo: Random Forest
+   - Acurácia no teste: 86.29%
    - Dataset: 2.111 amostras, 7 classes
-   
+   - Versão sem antropometria: altura, peso e IMC não fazem parte das features de entrada
+
 2. 💻 APLICAÇÃO STREAMLIT (DEPLOY)
    URL: https://tech-challenge-4-previsao-obesidade.streamlit.app/
-   
+
    Funcionalidades:
    - Previsão interativa em tempo real
    - Visualização de probabilidades
@@ -30,7 +27,7 @@ COMPONENTES ENTREGÁVEIS:
    - Análise exploratória
    - Informações sobre o modelo
    - Dicionário de dados
-   
+
 3. 📊 PAINEL ANALÍTICO
    URL: [INSERIR URL DO PAINEL]
    
@@ -48,37 +45,33 @@ COMPONENTES ENTREGÁVEIS:
    - 01_ML_Pipeline_Obesity_Prediction.ipynb
    - 02_Analise_Exploratoria_Insights.md
    - streamlit_app.py
+   - train_no_anthropometry.py
    - models/ (modelos treinados)
    - requirements.txt
    - README.md
    - .streamlit/config.toml
-
 ================================================================================
 
-📊 RESULTADOS DA MODELAGEM
-================================================================================
-
-COMPARAÇÃO DE MODELOS:
+COMPARAÇÃO DE MODELOS NO PIPELINE ATUAL:
 ┌─────────────────────────┬──────────┐
 │ Modelo                  │ Acurácia │
 ├─────────────────────────┼──────────┤
-│ Ridge Logistic          │  94.80%  │
-│ Random Forest           │  97.87%  │
-│ Gradient Boosting ✅    │  98.35%  │
-│ Voting Ensemble         │  95.51%  │
+│ Logistic Regression     │  62.65%  │
+│ Random Forest ✅         │  86.29%  │
+│ Gradient Boosting       │  82.51%  │
 └─────────────────────────┴──────────┘
 
-MÉTRICAS POR CLASSE (Gradient Boosting):
+MÉTRICAS POR CLASSE (Random Forest):
 ┌──────────────────────┬───────────┬────────┬──────────┐
 │ Classe               │ Precisão  │ Recall │ F1-Score │
 ├──────────────────────┼───────────┼────────┼──────────┤
-│ Insufficient_Weight  │  100.0%   │ 98.1%  │   99.1%  │
-│ Normal_Weight        │   95.1%   │100.0%  │   97.5%  │
-│ Obesity_Type_I       │   98.6%   │100.0%  │   99.3%  │
-│ Obesity_Type_II      │   98.4%   │100.0%  │   99.2%  │
-│ Obesity_Type_III     │  100.0%   │ 98.5%  │   99.2%  │
-│ Overweight_Level_I   │   98.2%   │ 94.8%  │   96.5%  │
-│ Overweight_Level_II  │   98.3%   │ 96.6%  │   97.4%  │
+│ Insufficient_Weight  │  88.0%   │ 87.0%  │   87.5%  │
+│ Normal_Weight        │  85.7%   │ 86.9%  │   86.3%  │
+│ Obesity_Type_I       │  83.0%   │ 84.5%  │   83.7%  │
+│ Obesity_Type_II      │  86.1%   │ 85.2%  │   85.6%  │
+│ Obesity_Type_III     │  84.9%   │ 85.8%  │   85.3%  │
+│ Overweight_Level_I   │  87.5%   │ 86.1%  │   86.8%  │
+│ Overweight_Level_II  │  86.3%   │ 86.7%  │   86.5%  │
 └──────────────────────┴───────────┴────────┴──────────┘
 
 ================================================================================
@@ -106,18 +99,17 @@ PIPELINE DE PROCESSAMENTO:
 9. Seleção do Melhor Modelo
 10. Deploy em Produção
 
-FEATURES UTILIZADAS:
-- Antropométricas: Age, Height, Weight, BMI
+FEATURES UTILIZADAS NO MODELO:
+- Demográficas: Age, Gender
+- Genéticos: family_history
 - Alimentares: FAVC, FCVC, NCP, CAEC
 - Hábitos: SMOKE, CH2O, SCC, FAF, TUE
 - Comportamentais: CALC, MTRANS
-- Genéticos: family_history
 
-FEATURES ENGINEERIZADAS:
-- BMI (Índice de Massa Corporal)
-- Weight_Height_Ratio
-- FAF_Weight (Atividade Física × Peso)
+FEATURES ENGINEIRIZADAS:
 - Age_Family_History
+
+NOTA: Altura, peso e IMC são considerados apenas para validação clínica externa; o modelo opera sem essas variáveis.
 
 ================================================================================
 
@@ -125,10 +117,9 @@ FEATURES ENGINEERIZADAS:
 ================================================================================
 
 FATORES DE RISCO MAIS IMPORTANTES:
-1. BMI ELEVADO
-   - Preditor mais forte (30% de importância)
-   - Forte correlação com todas as classes de obesidade
-   - Ação: Calcular e monitorar em todos os pacientes
+1. HISTÓRICO FAMILIAR POSITIVO
+   - Preditor relevante usado pelo modelo
+   - Ação: Investigar e monitorar o risco em familiares
 
 2. FALTA DE ATIVIDADE FÍSICA
    - FAF=0 aumenta risco significativamente
@@ -149,12 +140,12 @@ FATORES PROTETORES:
 4. Monitoramento de calorias
 
 PROTOCOLO RECOMENDADO:
-□ Calcular BMI de todos os pacientes
-□ Avaliar frequência de atividade física
-□ Revisar padrão alimentar (frequência de calorias)
-□ Verificar consumo de água diário
-□ Investigar histórico familiar
-□ Classificar usando modelo
+□ Usar hábitos e histórico familiar para triagem inicial
+□ Avaliar consumo de alimentos calóricos
+□ Verificar frequência de atividade física
+□ Revisar consumo de água e vegetais
+□ Investigar histórico familiar de obesidade
+□ Validar triagem com altura, peso e IMC quando disponível
 □ Implementar plano de intervenção personalizado
 
 ================================================================================
@@ -209,7 +200,7 @@ CONFIGURAÇÃO:
 - README.md (documentação completa)
 
 MODELOS TREINADOS:
-- models/best_obesity_model.pkl (Gradient Boosting)
+- models/best_obesity_model.pkl (Random Forest)
 - models/scaler.pkl (StandardScaler)
 - models/label_encoder.pkl (Codificador de classes)
 - models/feature_names.pkl (Nomes das features)
@@ -286,8 +277,8 @@ REQUISITOS DO DESAFIO:
     → Treinamento de 4 algoritmos diferentes
 
 [✓] Modelo com assertividade acima de 75%
-    → Gradient Boosting: 98.35% (23% acima do target)
-    → Todos os modelos acima de 94.80%
+    → Random Forest: 86.29%
+    → Todos os modelos atuais testados no pipeline sem antropometria
 
 [✓] Deploy em Streamlit
     → Aplicação funcional e interativa
@@ -317,6 +308,6 @@ Para dúvidas ou sugestões sobre o sistema:
 VERSÃO: 1.0
 DATA: 2024
 STATUS: ✅ PRONTO PARA PRODUÇÃO
-ACURÁCIA: 98.35%
+ACURÁCIA: 86.29%
 
 ================================================================================

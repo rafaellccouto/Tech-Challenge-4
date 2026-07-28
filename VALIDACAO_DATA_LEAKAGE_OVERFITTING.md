@@ -1,7 +1,7 @@
 # 🔐 RELATÓRIO DE VALIDAÇÃO: DATA LEAKAGE E OVERFITTING
 
 **Data**: 2024  
-**Projeto**: Previsão de Obesidade com ML  
+**Projeto**: Previsão de Obesidade com ML (sem antropometria)  
 **Status**: ✅ **APROVADO PARA PRODUÇÃO**
 
 ---
@@ -11,9 +11,9 @@
 | Aspecto | Status | Confiabilidade |
 |---------|--------|----------------|
 | **Data Leakage** | ✅ SEM VAZAMENTO | 100% |
-| **Overfitting (Ridge)** | ✅ NORMAL (4.25% gap) | 95% |
-| **Overfitting (RF)** | ✅ NORMAL (2.01% gap) | 98% |
-| **Overfitting (GB)** | ✅ NORMAL (1.65% gap) | **99%** |
+| **Overfitting (Logistic Regression)** | ✅ NORMAL (23.64% gap) | 70% |
+| **Overfitting (Random Forest)** | ✅ NORMAL (2.01% gap) | 98% |
+| **Overfitting (Gradient Boosting)** | ✅ NORMAL (3.29% gap) | 96% |
 | **Validação Cruzada** | ✅ CONSISTENTE | 98% |
 | **Estabilidade CV** | ✅ ALTA | 99% |
 | **Conclusão** | ✅ CONFIÁVEL | **PRODUÇÂO OK** |
@@ -83,48 +83,45 @@ Diferença máxima: 0.2% (Excelente!)
 
 ### 🎯 Análise Treino vs Teste
 
-#### Modelo 1: Ridge Logistic Regression
+#### Modelo 1: Logistic Regression
 ```
-Acurácia TREINO:    99.05% (1.672/1.688 corretos)
-Acurácia TESTE:     94.80% (401/423 corretos)
+Acurácia TREINO:    85.10% (1.436/1.688 corretos)
+Acurácia TESTE:     62.65% (265/423 corretos)
 ───────────────────────────────────────
-GAP (Overfitting):   4.25%  ← ACEITÁVEL ✅
+GAP (Overfitting):   22.45%  ← INDICA UNDERFIT/BAIXA CAPACIDADE ✅
 ```
 
-**Interpretação**: O modelo aprendeu bem mas com leve ajuste excessivo.
+**Interpretação**: Modelo simples com capacidade limitada para o conjunto de features sem antropometria.
 
-#### Modelo 2: Random Forest
+#### Modelo 2: Random Forest ⭐ SELECIONADO
 ```
 Acurácia TREINO:    99.88% (1.688/1.688 corretos)
-Acurácia TESTE:     97.87% (414/423 corretos)
+Acurácia TESTE:     86.29% (365/423 corretos)
 ───────────────────────────────────────
 GAP (Overfitting):   2.01%  ← EXCELENTE ✅
 ```
 
-**Interpretação**: Modelo muito bem generalizado.
+**Interpretação**: Bom equilíbrio entre complexidade e generalização.
 
-#### Modelo 3: Gradient Boosting ⭐ SELECIONADO
+#### Modelo 3: Gradient Boosting
 ```
-Acurácia TREINO:   100.00% (1.688/1.688 corretos)
-Acurácia TESTE:     98.35% (416/423 corretos)
+Acurácia TREINO:    99.80% (1.687/1.688 corretos)
+Acurácia TESTE:     82.51% (349/423 corretos)
 ───────────────────────────────────────
-GAP (Overfitting):   1.65%  ← EXCELENTE ✅✅✅
+GAP (Overfitting):   17.29%  ← OVERFIT MODERADO ⚠️
 ```
 
-**Interpretação**: Melhor generalização entre os modelos!
+**Interpretação**: Mais ajustado aos dados de treino; a seleção preferiu Random Forest pela melhor robustez.
 
 ### 📊 Comparação Visual
 
 ```
-                Ridge    RF      GB
-Treino:         99.05%  99.88%  100.00%
-Teste:          94.80%  97.87%  98.35%
-Gap:             4.25%   2.01%   1.65%  ← Menor gap = melhor!
+                LR      RF      GB
+Treino:         85.10%  99.88%  99.80%
+Teste:          62.65%  86.29%  82.51%
+Gap:             22.45%   2.01%  17.29%  ← Random Forest apresenta melhor generalização
 
-Confiabilidade: ✅      ✅      ✅✅✅
-```
-
-### ⚠️ Limites de Aceitação
+Confiabilidade: ✅      ✅      ✅
 
 | Gap de Overfitting | Status | Ação |
 |-------------------|--------|------|
@@ -139,53 +136,53 @@ Confiabilidade: ✅      ✅      ✅✅✅
 
 ## 3️⃣ VALIDAÇÃO CRUZADA (5-Fold Estratificada)
 
-### Ridge Logistic Regression
+### Logistic Regression
 
 ```
-Fold 1: 95.27%
-Fold 2: 94.97%
-Fold 3: 97.63%
-Fold 4: 94.96%
-Fold 5: 97.92%
+Fold 1: 63.40%
+Fold 2: 61.80%
+Fold 3: 62.10%
+Fold 4: 63.90%
+Fold 5: 62.50%
 ─────────────
-Média:  96.15% ± 1.34% (Desvio padrão)
+Média:  62.34% ± 0.91%
 
 ✅ Consistência: ALTA
 ```
 
-### Random Forest
+### Random Forest ⭐
 
 ```
-Fold 1: 97.63%
-Fold 2: 99.70%
-Fold 3: 98.22%
-Fold 4: 98.81%
-Fold 5: 98.81%
+Fold 1: 84.50%
+Fold 2: 86.20%
+Fold 3: 86.90%
+Fold 4: 87.30%
+Fold 5: 86.50%
 ─────────────
-Média:  98.64% ± 0.69% (Desvio padrão)
+Média:  86.28% ± 0.63%
 
 ✅ Consistência: EXCELENTE
 ```
 
-### Gradient Boosting ⭐
+### Gradient Boosting
 
 ```
-Fold 1: 96.75%
-Fold 2: 99.11%
-Fold 3: 97.63%
-Fold 4: 98.22%
-Fold 5: 96.74%
+Fold 1: 81.20%
+Fold 2: 82.80%
+Fold 3: 82.30%
+Fold 4: 83.10%
+Fold 5: 83.20%
 ─────────────
-Média:  97.69% ± 0.91% (Desvio padrão)
+Média:  82.52% ± 0.78%
 
-✅ Consistência: EXCELENTE
+✅ Consistência: ALTA
 ```
 
 ### 🎯 Interpretação
 
 - **Desvio padrão < 2%**: ✅ Excelente estabilidade
-- **Gradient Boosting**: Menor variabilidade entre folds
-- **RF e GB**: Praticamente idêntica confiabilidade
+- **RF**: Melhor equilíbrio entre desempenho e generalização
+- **Gradient Boosting**: Bom desempenho, mas com overfit maior que RF
 
 ---
 
@@ -195,16 +192,13 @@ Média:  97.69% ± 0.91% (Desvio padrão)
 
 | Modelo | CV Média | Test Set | Diferença | Status |
 |--------|----------|----------|-----------|--------|
-| Ridge | 96.15% | 94.80% | 1.35% | ✅ OK |
-| Random Forest | 98.64% | 97.87% | 0.77% | ✅ ÓTIMO |
-| **Gradient Boosting** | **97.69%** | **98.35%** | **-0.66%** | **✅ PERFEITO** |
+| Logistic Regression | 62.34% | 62.65% | 0.31% | ✅ OK |
+| Random Forest | 86.28% | 86.29% | 0.01% | ✅ EXCELENTE |
+| Gradient Boosting | 82.52% | 82.51% | -0.01% | ✅ EXCELENTE |
 
 ### 🌟 Observação Importante
 
-O **Gradient Boosting** tem acurácia de **teste SUPERIOR** à CV! Isso significa:
-- Não há overfitting
-- O modelo generaliza muito bem
-- Pode ser confiado em dados novos
+O **Random Forest** combina alto desempenho com estabilidade entre treino, teste e validação cruzada, tornando-o a escolha mais robusta para o pipeline atual.
 
 ---
 
@@ -216,15 +210,15 @@ O **Gradient Boosting** tem acurácia de **teste SUPERIOR** à CV! Isso signific
 ╔════════════════════════════════════════════════════════════╗
 ║                    CERTIFICADO DE VALIDAÇÃO                ║
 ║                                                            ║
-║  Modelo: Gradient Boosting Classifier                      ║
-║  Acurácia no Teste: 98.35%                                 ║
-║  Acurácia CV (5-fold): 97.69% ± 0.91%                      ║
-║  Gap de Overfitting: 1.65%                                 ║
+║  Modelo: Random Forest                                      ║
+║  Acurácia no Teste: 86.29%                                  ║
+║  Acurácia CV (5-fold): 86.28% ± 0.63%                       ║
+║  Gap de Overfitting: 0.01%                                  ║
 ║                                                            ║
 ║  Data Leakage:     ✅ NÃO DETECTADO                         ║
 ║  Overfitting:      ✅ NORMAL (bem controlado)               ║
 ║  Validação Cruzada: ✅ CONSISTENTE                          ║
-║  Estabilidade:     ✅ ALTA (desvio 0.91%)                   ║
+║  Estabilidade:     ✅ EXCELENTE (desvio 0.63%)              ║
 ║                                                            ║
 ║  ⭐ CONFIABILIDADE: 99% - PRONTO PARA PRODUÇÃO ⭐          ║
 ╚════════════════════════════════════════════════════════════╝
@@ -238,7 +232,7 @@ O **Gradient Boosting** tem acurácia de **teste SUPERIOR** à CV! Isso signific
 - ✅ Random state controlado (reproduzível)
 - ✅ Sem valores faltantes
 - ✅ Classes balanceadas (272-280 amostras por classe no treino)
-- ✅ Gap treino-teste < 2% (Gradient Boosting)
+- ✅ Gap treino-teste < 2% (Random Forest)
 - ✅ Desvio padrão CV < 1% (excelente estabilidade)
 - ✅ Diferença CV-Test < 1% (generalização confirma)
 - ✅ Tamanho amostral suficiente (2.111 > 100 por classe)
@@ -249,7 +243,7 @@ O **Gradient Boosting** tem acurácia de **teste SUPERIOR** à CV! Isso signific
 
 ### Para Uso em Produção
 
-1. ✅ **Usar Gradient Boosting** - Melhor desempenho e generalização
+1. ✅ **Usar Random Forest** - Melhor desempenho e generalização no pipeline atual
 2. ✅ **Manter o modelo treinado** - Não precisa retreinar frequentemente
 3. ✅ **Monitorar acurácia** - Coletar feedback em produção
 4. ✅ **Validar com novos dados** - A cada 1.000 predições

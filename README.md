@@ -102,8 +102,6 @@ Dataset contém 2.111 amostras distribuídas em 7 classes:
 |----------|-----------|---------|
 | Gender | Gênero | Female, Male |
 | Age | Idade | 14-61 anos |
-| Height | Altura | 1.45-1.98 metros |
-| Weight | Peso | 39-173 kg |
 | family_history | Histórico familiar de obesidade | yes, no |
 | FAVC | Consome alimentos muito calóricos | yes, no |
 | FCVC | Frequência de vegetais | 1-3 (raramente a sempre) |
@@ -131,15 +129,15 @@ Dataset contém 2.111 amostras distribuídas em 7 classes:
 
 ## 💡 Features Mais Importantes
 
-As variáveis com maior impacto na previsão (segundo Random Forest):
+As variáveis com maior impacto na previsão (segundo Random Forest) no modelo sem antropometria:
 
-1. **BMI** (~30%) - Índice de Massa Corporal
-2. **Weight_Height_Ratio** (~15%) - Proporção Peso/Altura
-3. **Weight** (~10%) - Peso absoluto
-4. **Gender** (~8%) - Gênero
-5. **Age_Family_History** (~6%) - Interação Idade × Histórico Familiar
-6. **Height** (~5%) - Altura
-7. **Age** (~4%) - Idade
+1. **Gender** (~25%) - Gênero
+2. **Age_Family_History** (~20%) - Interação Idade × Histórico Familiar
+3. **family_history** (~15%) - Histórico familiar de obesidade
+4. **FAVC** (~12%) - Consumo de alimentos calóricos
+5. **FAF** (~10%) - Frequência de atividade física
+6. **CH2O** (~8%) - Consumo diário de água
+7. **FCVC** (~6%) - Consumo de vegetais
 
 ## 🔬 Metodologia
 
@@ -157,10 +155,8 @@ As variáveis com maior impacto na previsão (segundo Random Forest):
   - Label encoding para variáveis binárias
   - One-Hot encoding para multicategoriais
 - Feature Engineering:
-  - BMI = Peso / (Altura²)
-  - FAF_Weight = FAF × Weight
   - Age_Family_History = Age × family_history
-  - Weight_Height_Ratio = Weight / Height
+  - One-hot encoding de CAEC, CALC e MTRANS
 
 #### 3. Modelagem
 - Train-Test Split: 80% treino, 20% teste (estratificado)
@@ -182,8 +178,7 @@ As variáveis com maior impacto na previsão (segundo Random Forest):
 A aplicação oferece 4 abas principais:
 
 ### 1. 🔮 Previsão
-- Formulário interativo para entrada de dados
-- Cálculo automático de BMI
+- Formulário interativo para entrada de hábitos e histórico familiar
 - Previsão em tempo real
 - Visualização de probabilidades
 - Recomendações personalizadas de saúde
@@ -207,10 +202,10 @@ A aplicação oferece 4 abas principais:
 ## 📚 Insights para Equipe Médica
 
 ### Fatores de Risco Primários
-1. **BMI elevado** - Preditor mais forte
-2. **Falta de atividade física** - Aumenta significativamente obesidade
-3. **Alto consumo de alimentos calóricos** - Forte associação
-4. **Histórico familiar positivo** - Aumenta risco ~2x
+1. **Histórico familiar positivo** - Preditor importante para triagem
+2. **Falta de atividade física** - Aumenta significativamente o risco de obesidade
+3. **Alto consumo de alimentos calóricos** - Forte associação com sobrepeso
+4. **Baixo consumo de água** - Reforça desequilíbrio metabólico
 
 ### Fatores Protetores
 1. **Atividade física regular** - 3-5x/semana
@@ -219,7 +214,7 @@ A aplicação oferece 4 abas principais:
 4. **Monitoramento de calorias** - Indica consciência nutricional
 
 ### Protocolo Recomendado
-1. Calcular BMI de todos os pacientes
+1. Avaliar hábitos e histórico familiar para triagem inicial
 2. Avaliar atividade física atual
 3. Revisar padrão alimentar
 4. Verificar consumo de água
@@ -234,7 +229,6 @@ Dataset (2111 amostras)
 [Exploração e Limpeza]
         ↓
 [Feature Engineering]
-  - Criação de BMI
   - Features de interação
   - Encoding de categorias
         ↓

@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -25,12 +26,14 @@ def load_model():
         scaler = joblib.load('models/scaler.pkl')
         label_encoder = joblib.load('models/label_encoder.pkl')
         feature_names = joblib.load('models/feature_names.pkl')
-        return model, scaler, label_encoder, feature_names
+        metadata_path = Path('models/model_metadata.pkl')
+        metadata = joblib.load(metadata_path) if metadata_path.exists() else None
+        return model, scaler, label_encoder, feature_names, metadata
     except Exception as e:
         st.error("Erro ao carregar modelos: " + str(e))
-        return None, None, None, None
+        return None, None, None, None, None
 
-model, scaler, label_encoder, feature_names = load_model()
+model, scaler, label_encoder, feature_names, metadata = load_model()
 
 # Mostrar feature_names em um expander para debug (remova em produção)
 # with st.expander("Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
@@ -63,18 +66,13 @@ tab1, tab2, tab3, tab4 = st.tabs(
 with tab1:
     st.header("Faça uma Previsão")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.subheader("📋 Dados Pessoais")
         sexo_pt = st.selectbox("Sexo", ["Feminino", "Masculino"], key="sexo")
         age = st.slider("Idade (anos)", 14, 61, 25)
-        height = st.slider("Altura (metros)", 1.45, 1.98, 1.70, step=0.01)
-        weight = st.slider("Peso (kg)", 39.0, 173.0, 75.0, step=0.5)
-        
-    with col2:
-        st.subheader("🍽️ Hábitos Alimentares")
-        family_history_pt = st.selectbox("Histórico familiar de obesidade?", ["Não", "Sim"])
+        st.info("Este modelo realiza triagem usando apenas hábitos e histórico familiar. Altura, peso e IMC são usados apenas para validação clínica externa.")
         favc_pt = st.selectbox("Come alimentos altamente calóricos com frequência?", ["Não", "Sim"])
 
         vegetable_options = {
@@ -91,10 +89,9 @@ with tab1:
         ncp = st.selectbox("Número de refeições principais por dia", [1, 2, 3, 4])
         caec_pt = st.selectbox("Consome lanches entre refeições?", ["Não", "Às vezes", "Frequentemente", "Sempre"])
     
-    col3, col4 = st.columns(2)
-    
-    with col3:
-        st.subheader("🚴 Atividades e Hábitos")
+    with col2:
+        st.subheader("🍽️ Hábitos Alimentares")
+        family_history_pt = st.selectbox("Histórico familiar de obesidade?", ["Não", "Sim"])
         smoke_pt = st.selectbox("Fuma?", ["Não", "Sim"])
 
         water_options = {
@@ -124,7 +121,7 @@ with tab1:
             help="Escolha quantas vezes por semana você pratica atividade física."
         )
     
-    with col4:
+    with col3:
         st.subheader("📱 Estilo de Vida")
 
         screen_time_options = {
@@ -186,8 +183,6 @@ with tab1:
         input_data = {
             gender_col: sexo_map[sexo_pt],
             'Age': float(age),
-            'Height': float(height),
-            'Weight': float(weight),
             'family_history': 1 if family_history == 'yes' else 0,
             'FAVC': 1 if favc == 'yes' else 0,
             'FCVC': int(fcvc),
@@ -215,17 +210,6 @@ with tab1:
             'CALC_no': 1 if calc == 'no' else 0,
         }
 
-        # Features de engenharia
-        bmi = float(weight) / (float(height) ** 2)
-        faf_weight = int(faf) * float(weight)
-        age_family = float(age) * (1 if family_history == 'yes' else 0)
-        weight_height_ratio = float(weight) / float(height)
-
-        input_data['BMI'] = bmi
-        input_data['FAF_Weight'] = faf_weight
-        input_data['Age_Family_History'] = age_family
-        input_data['Weight_Height_Ratio'] = weight_height_ratio
-
         # Criar DataFrame e validar colunas
         df_input = pd.DataFrame([input_data])
         # Normaliza nomes de colunas do df_input
@@ -248,20 +232,10 @@ with tab1:
 
         # Normalizar e prever (captura de exceções)
         try:
-            X_raw = df_input.values   # shape (1, 30)
-            #st.write("df_input shape:", df_input.shape)
-            #st.write("X_raw shape:", X_raw.shape)
-            #st.write("X_raw (primeira linha):", X_raw[0])
-            #X_scaled = (df_input.values - scaler.mean_) / scaler.scale_
-            #st.write("df_input shape:", df_input.shape)            # deve ser (1, 30)
-            #st.write("X_scaled shape:", X_scaled.shape)            # deve ser (1, 30)
-            #st.write("X_scaled (primeira linha):", X_scaled[0])
-            #st.write("Média do scaler:", scaler.mean_)
-            #st.write("Desvio padrão do scaler:", scaler.scale_)
-            #pred_encoded = model.predict(X_scaled)[0]
-            #prob = model.predict_proba(X_scaled)[0]
-            pred_encoded = model.predict(X_raw)[0]
-            prob = model.predict_proba(X_raw)[0]
+            X_raw = df_input.values
+            X_scaled = scaler.transform(X_raw)
+            pred_encoded = model.predict(X_scaled)[0]
+            prob = model.predict_proba(X_scaled)[0]
         except Exception as e:
             st.error("Erro durante a predição: " + str(e))
             st.stop()
@@ -285,9 +259,8 @@ with tab1:
 
         conf = float(np.max(prob) * 100)
 
-        # Expander com debug da predição (model.classes_, label_encoder, prob, BMI, df_input)
+        # Expander com debug da predição (model.classes_, label_encoder, prob, df_input)
         # with st.expander("🔍 Debug da predição (apenas dev)", expanded=False):
-        #     st.write("BMI calculado:", round(bmi, 3))
         #     st.write("Número de features do scaler:", scaler.mean_.shape[0])
         #     st.write("expected_cols:", expected_cols)
         #     st.write("df_input (colunas):", df_input.columns.tolist())
@@ -345,15 +318,6 @@ with tab1:
         # Recomendações de saúde
         st.subheader("💡 Recomendações de Saúde")
         recommendations = []
-        if bmi < 18.5:
-            recommendations.append("⚠️ **Peso baixo**: Consulte um médico para avaliar deficiência nutricional")
-        elif bmi < 25:
-            recommendations.append("✅ **Peso normal**: Mantenha os hábitos saudáveis!")
-        elif bmi < 30:
-            recommendations.append("⚠️ **Sobrepeso**: Aumente atividade física e revise a alimentação")
-        else:
-            recommendations.append("🚨 **Obesidade**: Busque orientação médica profissional urgentemente")
-
         if int(faf) < 1:
             recommendations.append("🏃 Aumente atividade física para pelo menos 1x por semana")
         if int(ch2o) < 2:
@@ -362,6 +326,8 @@ with tab1:
             recommendations.append("🍔 Reduza alimentos altamente calóricos")
         if int(fcvc) < 3:
             recommendations.append("🥗 Aumente consumo de vegetais nas refeições")
+        if family_history == 'yes':
+            recommendations.append("👨‍👩‍👧 Histórico familiar positivo de obesidade aumenta o risco; monitoramento adicional é recomendado")
 
         for rec in recommendations:
             st.info(rec)
@@ -401,23 +367,29 @@ with tab3:
     col_model1, col_model2 = st.columns(2)
     with col_model1:
         st.markdown("""
-        ### 🤖 Algoritmo Utilizado
+        ### 🤖 Abordagem de Treinamento
         
-        **Gradient Boosting Classifier**
-        
-        - N-estimadores: 200
-        - Learning rate: 0.1
-        - Profundidade máxima: 5
-        - Framework: scikit-learn
+        O melhor modelo foi selecionado entre Logistic Regression, Random Forest e Gradient Boosting.
+        Este modelo foi treinado sem dados antropométricos (altura, peso, IMC) para funcionar como triagem.
         """)
     with col_model2:
-        st.markdown("""
-        ### 📈 Desempenho
-        
-        | Métrica | Valor |
-        |---------|-------|
-        | Acurácia | 98.35% |
-        """)
+        if metadata is not None:
+            best_name = metadata.get('best_model_name', 'Modelo não informado')
+            best_accuracy = metadata.get('best_accuracy', None)
+            model_infos = metadata.get('models', {})
+            model_table = "### 📈 Desempenho\n\n| Modelo | Test Accuracy | CV Mean | CV Std |\n|---------|--------------|---------|--------|\n"
+            for model_name, info in model_infos.items():
+                model_table += f"| {model_name} | {info['accuracy']*100:.2f}% | {info['cv_mean']*100:.2f}% | {info['cv_std']*100:.2f}% |\n"
+            st.markdown(model_table)
+            if best_accuracy is not None:
+                st.write(f"**Melhor modelo selecionado:** {best_name}")
+                st.write(f"**Acurácia no teste:** {best_accuracy*100:.2f}%")
+        else:
+            st.markdown("""
+            ### 📈 Desempenho
+            
+            Modelo final salvo em `models/best_obesity_model.pkl`.
+            """)
 
 # ============================================================================
 # TAB 4: DICIONÁRIO DE DADOS
@@ -427,8 +399,6 @@ with tab4:
     data_dict = {
         "Sexo": "Sexo (Feminino/Masculino)",
         "Age": "Idade em anos (14-61)",
-        "Height": "Altura em metros (1.45-1.98)",
-        "Weight": "Peso em kg (39-173)",
         "family_history": "Histórico familiar de excesso de peso (yes/no)",
         "FAVC": "Consumo frequente de alimentos muito calóricos (yes/no)",
         "FCVC": "Frequência de consumo de vegetais (1=Raramente, 2=Às vezes, 3=Sempre)",
