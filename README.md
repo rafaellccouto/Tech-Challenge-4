@@ -41,6 +41,8 @@ Tech Challenge 4/
 
 ### 1. Instalar Dependências
 
+> Recomendado: use Python 3.11 para compatibilidade com a versão de scikit-learn usada no deploy.
+
 ```bash
 pip install pandas numpy scikit-learn matplotlib seaborn streamlit joblib scipy
 ```
