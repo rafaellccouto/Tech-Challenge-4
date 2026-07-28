@@ -2,14 +2,14 @@
 
 ## 📋 Descrição do Projeto
 
-Sistema de Machine Learning para auxiliar médicos e médicas na previsão e diagnóstico de obesity. O modelo utiliza dados antropométricos, alimentares e de estilo de vida para classificar o nível de obesidade em 7 categorias.
+Sistema de Machine Learning para auxiliar médicos e médicas na previsão e diagnóstico de obesity. O modelo utiliza dados de hábitos, histórico familiar, alimentação e estilo de vida para classificar o nível de obesidade em 7 categorias.
 
-**Acurácia: 98.35%** ✅ (Acima do target de 75%)
+**Acurácia: 86.29%** ✅ (Acima do target de 75%)
 
 ## 🎯 Objetivos Alcançados
 
 - ✅ **Pipeline completo de ML** com feature engineering e treinamento
-- ✅ **Modelo com 98.35% de acurácia** (Gradient Boosting)
+- ✅ **Modelo com 86.29% de acurácia** (Random Forest)
 - ✅ **Deploy em Streamlit** - Aplicação interativa
 - ✅ **Análise exploratória** com insights para equipe médica
 - ✅ **Código documentado** e compartilhado no GitHub
@@ -21,6 +21,7 @@ Tech Challenge 4/
 ├── 01_ML_Pipeline_Obesity_Prediction.ipynb  # Notebook com pipeline completo
 ├── 02_Analise_Exploratoria_Insights.md      # Insights analíticos
 ├── streamlit_app.py                          # Aplicação Streamlit
+├── train_no_anthropometry.py                 # Script de treino sem antropometria
 ├── models/                                   # Modelos treinados
 │   ├── best_obesity_model.pkl
 │   ├── scaler.pkl
@@ -68,19 +69,14 @@ A aplicação abrirá em `http://localhost:8501`
 
 | Métrica | Valor |
 |---------|-------|
-| **Acurácia** | **98.35%** |
-| Precisão (média) | 98.37% |
-| Recall (média) | 98.35% |
-| F1-Score (média) | 98.34% |
+| **Acurácia** | **86.29%** |
+| Precisão (média) | 86.10% |
+| Recall (média) | 86.29% |
+| F1-Score (média) | 86.15% |
 
-### Comparação de Modelos Testados
+### Modelo Selecionado
 
-| Modelo | Acurácia |
-|--------|----------|
-| Ridge Logistic Regression | 94.80% |
-| Random Forest | 97.87% |
-| **Gradient Boosting** | **98.35%** ✅ |
-| Voting Ensemble | 95.51% |
+- **Random Forest** com melhor desempenho no pipeline sem antropometria
 
 ### Distribuição de Classes
 
@@ -164,14 +160,14 @@ As variáveis com maior impacto na previsão (segundo Random Forest) no modelo s
 - Validação: 5-fold Cross-Validation
 - Hiperparametrização: GridSearchCV
 
-#### 4. Modelos Testados
+#### 5. Modelos Testados
 - Ridge Logistic Regression (L2 Regularization)
 - Random Forest (200 estimadores)
-- Gradient Boosting (200 estimadores, LR=0.1)
+- Gradient Boosting (testado para comparação)
 - Voting Classifier (ensemble)
 
-#### 5. Seleção do Modelo
-**Gradient Boosting** selecionado por melhor desempenho (98.35%)
+#### 6. Seleção do Modelo
+**Random Forest** selecionado por melhor desempenho e robustez no pipeline atual.
 
 ## 🎨 Interface da Aplicação Streamlit
 
@@ -239,15 +235,15 @@ Dataset (2111 amostras)
 [StandardScaler]          ↓
         ↓                  ↓
 [Modelos Testados]        ↓
-  - Ridge (94.80%)        ↓
-  - RF (97.87%)           ↓
-  - GB (98.35%) ✅        ↓
-  - Voting (95.51%)       ↓
+  - Ridge Logistic Regression
+  - Random Forest ✅
+  - Gradient Boosting
+  - Voting Classifier
         ↓                  ↓
 [Validação com Teste]
         ↓
-    Acurácia: 98.35%
-    F1-Score: 0.9834
+    Acurácia: 86.29%
+    F1-Score: 0.8615
     
 [Deploy Streamlit]
 ```
@@ -264,7 +260,7 @@ Dataset (2111 amostras)
 ## 📦 Requisitos do Projeto
 
 - ✅ Pipeline de ML com feature engineering
-- ✅ Modelo com >75% acurácia (98.35%)
+- ✅ Modelo com >75% acurácia (86.29%)
 - ✅ Deploy em Streamlit
 - ✅ Análise e insights para equipe médica
 - ✅ Código no GitHub
