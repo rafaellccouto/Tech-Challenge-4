@@ -6,6 +6,20 @@ from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
+# Compatibilidade com diferentes versões do Streamlit
+if hasattr(st, 'cache_resource'):
+    cache_resource = st.cache_resource
+elif hasattr(st, 'cache_data'):
+    cache_resource = st.cache_data
+else:
+    cache_resource = st.cache
+
+def render_divider():
+    if hasattr(st, 'divider'):
+        st.divider()
+    else:
+        st.markdown('---')
+
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
 # ============================================================================
@@ -23,7 +37,7 @@ BASE_DIR = Path(__file__).resolve().parent
 MODELS_DIR = BASE_DIR / 'models'
 
 
-@st.cache_resource
+@cache_resource
 def load_model():
     try:
         model = joblib.load(MODELS_DIR / 'best_obesity_model.pkl')
@@ -57,7 +71,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-st.divider()
+render_divider()
 
 # ============================================================================
 # TABS PARA NAVEGAÇÃO
@@ -327,7 +341,7 @@ with tab1:
             for idx, row in prob_df.iterrows():
                 st.write(f"**{row['Classe']}**: {row['Probabilidade']*100:.1f}%")
 
-        st.divider()
+        render_divider()
 
         # Recomendações de saúde
         st.subheader("💡 Recomendações de Saúde")
@@ -433,7 +447,7 @@ with tab4:
 # ============================================================================
 # FOOTER
 # ============================================================================
-st.divider()
+render_divider()
 st.markdown("""
     <div style='text-align: center; color: #999; padding: 20px;'>
         <p>Sistema de Previsão de Obesidade | Postech - Tech Challenge 4</p>
