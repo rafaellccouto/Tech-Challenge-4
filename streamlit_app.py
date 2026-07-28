@@ -235,7 +235,15 @@ with tab1:
             X_raw = df_input.values
             X_scaled = scaler.transform(X_raw)
             pred_encoded = model.predict(X_scaled)[0]
-            prob = model.predict_proba(X_scaled)[0]
+            prob = model.predict_proba(X_scaled)[0].astype(float)
+
+            # Garantir que as probabilidades somem a 1 (normalização de segurança)
+            prob = np.clip(prob, 0.0, None)
+            prob_sum = float(np.sum(prob))
+            if prob_sum <= 0 or np.isnan(prob_sum):
+                raise ValueError("Probabilidades inválidas retornadas pelo modelo")
+            if not np.isclose(prob_sum, 1.0, atol=1e-6):
+                prob = prob / prob_sum
         except Exception as e:
             st.error("Erro durante a predição: " + str(e))
             st.stop()
