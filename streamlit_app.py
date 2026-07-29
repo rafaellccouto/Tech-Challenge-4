@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+import pickle
 from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
@@ -54,6 +55,39 @@ def load_model():
 
 
 model, scaler, label_encoder, feature_names, metadata = load_model()
+
+def preprocess_user_input(user_data_df):
+    # 1. Mapeamento para Snack_Health_Score
+    caec_map = {'no': 4, 'Sometimes': 3, 'Frequently': 2, 'Always': 1}
+    user_data_df['Snack_Health_Score'] = user_data_df['CAEC'].map(caec_map)
+
+    # 2. Lifestyle_Balance (FAF - TUE)
+    user_data_df['Lifestyle_Balance'] = user_data_df['FAF'] - user_data_df['TUE']
+
+    # 3. Water_per_Meal (CH2O / (NCP + 1))
+    user_data_df['Water_per_Meal'] = user_data_df['CH2O'] / (user_data_df['NCP'] + 1)
+
+    # 4. Encoding Binário (Mesma lógica do notebook)
+    user_data_df['family_history'] = (user_data_df['family_history'] == 'yes').astype(int)
+    user_data_df['FAVC'] = (user_data_df['FAVC'] == 'yes').astype(int)
+    user_data_df['SMOKE'] = (user_data_df['SMOKE'] == 'yes').astype(int)
+    user_data_df['SCC'] = (user_data_df['SCC'] == 'yes').astype(int)
+    user_data_df['Gender'] = (user_data_df['Gender'] == 'Male').astype(int)
+
+    # 5. One-Hot Encoding (Garantir que todas as colunas do treino existam)
+    user_data_encoded = pd.get_dummies(user_data_df, columns=['CAEC', 'CALC', 'MTRANS'])
+    
+    # Carregar a lista de colunas que o modelo espera
+    with open('models/feature_names.pkl', 'rb') as f:
+        model_features = pickle.load(f)
+
+    # Adicionar colunas faltantes com zero (caso o usuário não selecione certas opções no app)
+    for col in model_features:
+        if col not in user_data_encoded.columns:
+            user_data_encoded[col] = 0
+            
+    # Reordenar para garantir a ordem exata das colunas
+    return user_data_encoded[model_features]
 
 # Mostrar feature_names em um expander para debug (remova em produção)
 # with st.expander("Debug: nomes de features (apenas para desenvolvimento)", expanded=False):
