@@ -172,55 +172,38 @@ with tab1:
 
         # Processamento e Predição
         try:
-    X_processed = preprocess_user_input(raw_data, feature_names)
-    X_scaled = scaler.transform(X_processed)
-    pred_encoded = model.predict(X_scaled)[0]
-    prob_array = model.predict_proba(X_scaled)[0]
-    max_prob = np.max(prob_array)
-    pred_label = label_encoder.inverse_transform([pred_encoded])[0]
+            X_processed = preprocess_user_input(raw_data, feature_names)
+            X_scaled = scaler.transform(X_processed)
+            pred_encoded = model.predict(X_scaled)[0]
+            prob = model.predict_proba(X_scaled)[0]
+            pred_label = label_encoder.inverse_transform([pred_encoded])[0]
 
-    # Definicao qualitativa da confianca
-    if max_prob > 0.70:
-        confianca_nivel = "Alta"
-        cor_confianca = "#2ecc71" # Verde
-    elif max_prob > 0.40:
-        confianca_nivel = "Média"
-        cor_confianca = "#f1c40f" # Amarelo
-    else:
-        confianca_nivel = "Baixa"
-        cor_confianca = "#e74c3c" # Vermelho
+            class_name_map = {
+                "Overweight_Level_I": "Sobrepeso Nível I", "Overweight_Level_II": "Sobrepeso Nível II",
+                "Obesity_Type_I": "Obesidade Tipo I", "Obesity_Type_II": "Obesidade Tipo II",
+                "Obesity_Type_III": "Obesidade Tipo III", "Normal_Weight": "Peso Normal",
+                "Insufficient_Weight": "Peso Insuficiente"
+            }
+            pred_label_display = class_name_map.get(pred_label, pred_label)
+            
+            st.divider()
+            col_pred1, col_pred2 = st.columns([2, 1])
+            with col_pred1:
+                st.markdown(f"<div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white;'><h2>Classificação Prevista</h2><h1 style='font-size: 48px;'>{pred_label_display}</h1><p>Confiança: <strong>{np.max(prob)*100:.1f}%</strong></p></div>", unsafe_allow_html=True)
 
-    class_name_map = {
-        "Overweight_Level_I": "Sobrepeso Nível I", "Overweight_Level_II": "Sobrepeso Nível II",
-        "Obesity_Type_I": "Obesidade Tipo I", "Obesity_Type_II": "Obesidade Tipo II",
-        "Obesity_Type_III": "Obesidade Tipo III", "Normal_Weight": "Peso Normal",
-        "Insufficient_Weight": "Peso Insuficiente"
-    }
-    pred_label_display = class_name_map.get(pred_label, pred_label)
-    
-    st.divider()
-    col_pred1, col_pred2 = st.columns([2, 1])
-    with col_pred1:
-        st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white;'>
-                <h2>Classificação Prevista</h2>
-                <h1 style='font-size: 48px;'>{pred_label_display}</h1>
-                <p style='font-size: 20px;'>Probabilidade: <strong>{max_prob*100:.1f}%</strong></p>
-                <span style='background-color: {cor_confianca}; color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold;'>
-                    Confiança {confianca_nivel}
-                </span>
-            </div>
-        """, unsafe_allow_html=True)
+            with col_pred2:
+                st.markdown("### 📊 Probabilidades")
+                classes = list(label_encoder.classes_)
+                prob_df = pd.DataFrame({'Classe': [class_name_map.get(cl, cl) for cl in classes], 'Probabilidade': prob}).sort_values('Probabilidade', ascending=False)
+                for _, row in prob_df.iterrows():
+                    st.write(f"**{row['Classe']}**: {row['Probabilidade']*100:.1f}%")
 
-    with col_pred2:
-        st.markdown("### 📊 Probabilidades")
-        classes = list(label_encoder.classes_)
-        prob_df = pd.DataFrame({'Classe': [class_name_map.get(cl, cl) for cl in classes], 'Probabilidade': prob_array}).sort_values('Probabilidade', ascending=False)
-        for _, row in prob_df.iterrows():
-            st.write(f"**{row['Classe']}**: {row['Probabilidade']*100:.1f}%")
-
-except Exception as e:
-st.error(f"Erro na predição: {e}")
+            st.subheader("💡 Recomendações de Saúde")
+            if faf < 1: st.info("🏃 Aumente atividade física para pelo menos 1x por semana")
+            if ch2o < 2: st.info("💧 Aumente consumo de água para pelo menos 2L por dia")
+            if favc_pt == "Sim": st.info("🍔 Reduza alimentos altamente calóricos")
+        except Exception as e:
+            st.error(f"Erro na predição: {e}")
 
 # ============================================================================
 # TAB 2: ANÁLISE DE DADOS
