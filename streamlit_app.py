@@ -220,13 +220,45 @@ with tab2:
 # TAB 3: SOBRE O MODELO
 # ============================================================================
 with tab3:
-    st.header("ℹ️ Sobre o Modelo")
-    st.markdown("### 🤖 Abordagem de Treinamento")
-    st.write("O modelo utiliza features comportamentais e histórico familiar para triagem. Altura e Peso foram removidos do treino.")
+    st.header("Informações Técnicas do Modelo")
+    
     if metadata:
-        st.json(metadata)
+        # 1. Cards de Performance (Metricas em Percentual)
+        st.subheader("Desempenho nos Testes")
+        col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+        
+        with col_m1:
+            st.metric("Acurácia Geral", f"{metadata['accuracy']*100:.1f}%")
+        with col_m2:
+            st.metric("Precisão Médio", f"{metadata['precision']*100:.1f}%")
+        with col_m3:
+            st.metric("Recall Médio", f"{metadata['recall']*100:.1f}%")
+        with col_m4:
+            st.metric("F1-Score", f"{metadata['f1_score']*100:.1f}%")
+            
+        st.divider()
+        
+        # 2. Detalhes da Arquitetura
+        col_info1, col_info2 = st.columns(2)
+        
+        with col_info1:
+            st.subheader("Algoritmo Selecionado")
+            st.info(f"**Tipo:** {metadata['model_name']}")
+            st.write("Este modelo foi selecionado por apresentar o melhor equilíbrio entre sensibilidade e precisão para detectar diferentes níveis de obesidade.")
+            
+        with col_info2:
+            st.subheader("Variáveis de Entrada (Features)")
+            # Exibir features em uma lista organizada em colunas menores
+            feats = metadata['feature_names']
+            # Dividindo a lista de features para nao ficar uma coluna muito longa
+            half = len(feats) // 2
+            sub_col1, sub_col2 = st.columns(2)
+            with sub_col1:
+                for f in feats[:half]: st.markdown(f"- {f}")
+            with sub_col2:
+                for f in feats[half:]: st.markdown(f"- {f}")
     else:
-        st.info("Metadados não carregados (models/model_metadata.pkl).")
+        st.warning("Metadados não encontrados. Certifique-se de que o arquivo 'model_metadata.pkl' está na pasta /models.")
 
 # ============================================================================
 # TAB 4: DICIONÁRIO
