@@ -8,11 +8,11 @@ Sistema de Machine Learning para auxiliar médicos e médicas na previsão e dia
 
 ## 🎯 Objetivos Alcançados
 
-- ✅ **Pipeline completo de ML** com feature engineering e treinamento
-- ✅ **Modelo com 86.29% de acurácia** (Random Forest)
-- ✅ **Deploy em Streamlit** - Aplicação interativa
-- ✅ **Análise exploratória** com insights para equipe médica
-- ✅ **Código documentado** e compartilhado no GitHub
+-  **Pipeline completo de ML** com feature engineering e treinamento
+-  **Modelo com 86.29% de acurácia** (Random Forest)
+-  **Deploy em Streamlit** - Aplicação interativa
+-  **Análise exploratória** com insights para equipe médica
+-  **Código documentado** e compartilhado no GitHub
 
 ## 📊 Estrutura do Projeto
 
