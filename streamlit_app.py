@@ -98,8 +98,8 @@ render_divider()
 # ============================================================================
 # TABS PARA NAVEGAÇÃO
 # ============================================================================
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["Previsão", "📊 Análise de Dados", "ℹ️ Sobre o Modelo", "📖 Dicionário"]
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    ["Previsão", "📊 Análise de Dados", "ℹ️ Sobre o Modelo", "📖 Dicionário", "📈 Visão Analítica"]
 )
 
 # ============================================================================
@@ -268,6 +268,26 @@ with tab4:
     data_dict = {"Sexo": "Feminino/Masculino", "Age": "Idade em anos", "family_history": "Histórico familiar de excesso de peso", "FAVC": "Consumo frequente de alimentos calóricos", "FCVC": "Consumo de vegetais (1-3)", "FAF": "Atividade física semanal", "TUE": "Tempo de tela diário"}
     st.dataframe(pd.DataFrame(list(data_dict.items()), columns=['Variável', 'Descrição']), use_container_width=True)
 
+# ============================================================================
+# TAB 5: VISÃO ANALÍTICA (DASHBOARD)
+# ============================================================================
+with tab5:
+    st.header("📈 Visão Analítica do Projeto")
+    st.markdown("Nesta seção, você encontrará visualizações detalhadas do dashboard analítico extraído do pipeline de dados.")
+    
+    # ESPAÇO PARA IMAGENS DO GITHUB
+    # Para inserir, utilize: st.image("URL_DA_IMAGEM_NO_GITHUB")
+    
+    st.info("Aguardando inserção dos componentes visuais do dashboard.")
+    
+    # Exemplos de placeholders (Remova o comentário e preencha os espaços quando tiver as URLs):
+    # st.subheader("nome do dashboard")
+    # st.image("o link dele", caption="a legenda dele")
+    
+    # st.subheader("nome desse outro")
+    # st.image("o link dele", caption="a legenda dele")
+    
+    #para adicionar mais só repetir os exemplos acima
 # ============================================================================
 # FOOTER
 # ============================================================================
