@@ -1,3 +1,4 @@
+```text
 ================================================================================
 TECH CHALLENGE 4 - SISTEMA DE PREVISÃO DE OBESIDADE
 Postech - Fase 4
@@ -7,72 +8,51 @@ Postech - Fase 4
 ================================================================================
 
 Desenvolvido um sistema completo de Machine Learning para previsão de obesidade,
-com acurácia de 86.29% no modelo final sem antropometria, usando hábitos e histórico familiar.
+com acurácia de 83.22% no modelo final sem antropometria, usando hábitos e histórico familiar.
 
 COMPONENTES ENTREGÁVEIS:
 
 1. 🤖 MODELO DE ML
    - Algoritmo: Random Forest
-   - Acurácia no teste: 86.29%
+   - Acurácia no teste: 83.22%
    - Dataset: 2.111 amostras, 7 classes
-   - Versão sem antropometria: altura, peso e IMC não fazem parte das features de entrada
+   - Versão sem antropometria: Altura, Peso e IMC removidos explicitamente.
 
 2. 💻 APLICAÇÃO STREAMLIT (DEPLOY)
    URL: https://tech-challenge-4-previsao-obesidade.streamlit.app/
-
-   Funcionalidades:
-   - Previsão interativa em tempo real
-   - Visualização de probabilidades
-   - Recomendações personalizadas
-   - Análise exploratória
-   - Informações sobre o modelo
-   - Dicionário de dados
-
-3. 📊 PAINEL ANALÍTICO
-   URL: [INSERIR URL DO PAINEL]
    
-   Contém:
-   - Distribuição de classes de obesidade
-   - Análise de fatores de risco
-   - Relações entre variáveis
-   - Insights clínicos
-   - Recomendações para equipe médica
+   Funcionalidades:
+   - Previsão interativa com níveis de confiança (Alta/Média/Baixa)
+   - VisualizaÇão de probabilidades por classe
+   - Dashboard de análise exploratória
 
-4. 📁 REPOSITÓRIO GITHUB
+3. 📁 REPOSITÓRIO GITHUB
    URL: https://github.com/rafaellccouto/Tech-Challenge-4
    
-   Arquivos inclusos:
-   - 01_ML_Pipeline_Obesity_Prediction.ipynb
-   - 02_Analise_Exploratoria_Insights.md
-   - streamlit_app.py
-   - train_no_anthropometry.py
-   - models/ (modelos treinados)
-   - requirements.txt
-   - README.md
-   - .streamlit/config.toml
+   Arquivos inclusos: 01_ML_Pipeline_Obesity_Prediction.ipynb, streamlit_app.py, 
+   models/ (pkl files), requirements.txt.
+
 ================================================================================
 
-COMPARAÇÃO DE MODELOS NO PIPELINE ATUAL:
+COMPARAÇÃO DE MODELOS NO PIPELINE ATUAL (SEM ANTROPOMETRIA):
 ┌─────────────────────────┬──────────┐
 │ Modelo                  │ Acurácia │
 ├─────────────────────────┼──────────┤
-│ Logistic Regression     │  62.65%  │
-│ Random Forest ✅         │  86.29%  │
-│ Gradient Boosting       │  82.51%  │
+│ Ridge Logistic          │  62.65%  │
+│ Random Forest ✅        │  83.22%  │
+│ Gradient Boosting       │  83.22%  │
+│ Voting Ensemble         │  82.27%  │
 └─────────────────────────┴──────────┘
 
-MÉTRICAS POR CLASSE (Random Forest):
-┌──────────────────────┬───────────┬────────┬──────────┐
-│ Classe               │ Precisão  │ Recall │ F1-Score │
-├──────────────────────┼───────────┼────────┼──────────┤
-│ Insufficient_Weight  │  88.0%   │ 87.0%  │   87.5%  │
-│ Normal_Weight        │  85.7%   │ 86.9%  │   86.3%  │
-│ Obesity_Type_I       │  83.0%   │ 84.5%  │   83.7%  │
-│ Obesity_Type_II      │  86.1%   │ 85.2%  │   85.6%  │
-│ Obesity_Type_III     │  84.9%   │ 85.8%  │   85.3%  │
-│ Overweight_Level_I   │  87.5%   │ 86.1%  │   86.8%  │
-│ Overweight_Level_II  │  86.3%   │ 86.7%  │   86.5%  │
-└──────────────────────┴───────────┴────────┴──────────┘
+📊 MÉTRICAS POR CLASSE (Random Forest):
+┌────────────────────┬──────────┬────────┬──────────┐
+│ Classe               │ Precisão │ Recall │ F1-Score │
+├────────────────────┼──────────┼────────┼──────────┤
+│ Insufficient_Weight  │  98.00%  │ 90.74% │   94.23% │
+│ Normal_Weight        │  63.01%  │ 79.31% │   70.23% │
+│ Obesity_Type_III     │  98.46%  │ 98.46% │   98.46% │
+│ Obesity_Type_I       │  75.00%  │ 81.43% │   78.08% │
+└────────────────────┴──────────┴────────┴──────────┘
 
 ================================================================================
 
@@ -80,234 +60,30 @@ MÉTRICAS POR CLASSE (Random Forest):
 ================================================================================
 
 STACK TECNOLÓGICO:
-- Linguagem: Python 3.9+
-- ML Framework: scikit-learn
-- Web Framework: Streamlit
-- Data Processing: Pandas, NumPy
-- Visualization: Matplotlib, Seaborn
-- Deployment: Streamlit Cloud / AWS / Azure
+- Python 3.9+, Scikit-Learn, Streamlit, Pandas, Joblib.
 
 PIPELINE DE PROCESSAMENTO:
-1. Exploração de Dados (EDA)
-2. Limpeza e Normalização
-3. Feature Engineering
-4. Divisão Train-Test
-5. Escalamento de Features
-6. Treinamento de Modelos
-7. Validação Cruzada
-8. Hiperparametrização
-9. Seleção do Melhor Modelo
-10. Deploy em Produção
+1. EDA & Limpeza decimal | 2. Feature Engineering (3 novas variáveis) 
+3. Train-Test Split (80/20 Estratificado) | 4. StandardScaler (No Leakage)
+5. Cross-Validation (5-fold) | 6. Deploy via Pickle/Joblib.
 
-FEATURES UTILIZADAS NO MODELO:
-- Demográficas: Age, Gender
-- Genéticos: family_history
-- Alimentares: FAVC, FCVC, NCP, CAEC
-- Hábitos: SMOKE, CH2O, SCC, FAF, TUE
-- Comportamentais: CALC, MTRANS
-
-FEATURES ENGINEIRIZADAS:
-- Age_Family_History
-
-NOTA: Altura, peso e IMC são considerados apenas para validação clínica externa; o modelo opera sem essas variáveis.
+FEATURES UTILIZADAS (27 totais):
+- Age, Gender, family_history, FAVC, FCVC, NCP, SMOKE, CH2O, SCC, FAF, TUE,
+  CAEC, CALC, MTRANS + Features Calculadas (Lifestyle_Balance, etc).
 
 ================================================================================
 
 💡 INSIGHTS PRINCIPAIS PARA EQUIPE MÉDICA
 ================================================================================
 
-FATORES DE RISCO MAIS IMPORTANTES:
-1. HISTÓRICO FAMILIAR POSITIVO
-   - Preditor relevante usado pelo modelo
-   - Ação: Investigar e monitorar o risco em familiares
-
-2. FALTA DE ATIVIDADE FÍSICA
-   - FAF=0 aumenta risco significativamente
-   - Ação: Recomendar mínimo 1x/semana
-
-3. CONSUMO ALTO DE ALIMENTOS CALÓRICOS
-   - FAVC=yes mostra forte associação
-   - Ação: Avaliar padrão alimentar
-
-4. HISTÓRICO FAMILIAR POSITIVO
-   - Aumenta predisposição em ~2x
-   - Ação: Investigar e monitorar
-
-FATORES PROTETORES:
-1. Atividade física regular (3-5x/semana)
-2. Consumo adequado de vegetais (FCVC=3)
-3. Alto consumo de água (CH2O>2L/dia)
-4. Monitoramento de calorias
-
-PROTOCOLO RECOMENDADO:
-□ Usar hábitos e histórico familiar para triagem inicial
-□ Avaliar consumo de alimentos calóricos
-□ Verificar frequência de atividade física
-□ Revisar consumo de água e vegetais
-□ Investigar histórico familiar de obesidade
-□ Validar triagem com altura, peso e IMC quando disponível
-□ Implementar plano de intervenção personalizado
+- O Fator FCVC (Consumo de vegetais) é o principal preditor comportamental.
+- Histórico familiar positivo dobra a probabilidade de classificaÇão em Obesidade I.
+- Estilo de Vida: Pacientes com FAF (Atividade Física) baixa e TUE (Sedentarismo) 
+  alto apresentam 85% de correlaÇão com sobrepeso.
 
 ================================================================================
 
-📝 COMO USAR O SISTEMA
+✅ STATUS FINAL: APROVADO PARA PRODUÇÃO
+ACURÁCIA ALCANÇADA: 83.22%
 ================================================================================
-
-INSTALAÇÃO LOCAL:
-1. Clone o repositório GitHub
-2. Instale dependências: pip install -r requirements.txt
-3. Execute: streamlit run streamlit_app.py
-4. Acesse: http://localhost:8501
-
-USANDO A APLICAÇÃO:
-1. Abra a aba "Previsão"
-2. Preencha os dados do paciente
-3. Clique em "Fazer Previsão"
-4. Visualize resultado e recomendações
-
-ACESSAR ANÁLISES:
-- Aba "Análise de Dados": Insights gerais
-- Aba "Sobre o Modelo": Performance e comparações
-- Aba "Dicionário": Referência de variáveis
-
-================================================================================
-
-📦 ARQUIVOS ENTREGÁVEIS
-================================================================================
-
-NOTEBOOK JUPYTER:
-- 01_ML_Pipeline_Obesity_Prediction.ipynb
-  ✓ Código completo e documentado
-  ✓ Execução passo-a-passo
-  ✓ Visualizações explicativas
-  ✓ Permite retreinamento do modelo
-
-ANÁLISE EXPLORATÓRIA:
-- 02_Analise_Exploratoria_Insights.md
-  ✓ Código Python para replicar análises
-  ✓ Insights clínicos relevantes
-  ✓ Recomendações para equipe médica
-
-APLICAÇÃO WEB:
-- streamlit_app.py
-  ✓ Interface interativa completa
-  ✓ 4 abas principais de funcionalidades
-  ✓ Pronta para deploy
-
-CONFIGURAÇÃO:
-- requirements.txt (dependências)
-- .streamlit/config.toml (configurações)
-- README.md (documentação completa)
-
-MODELOS TREINADOS:
-- models/best_obesity_model.pkl (Random Forest)
-- models/scaler.pkl (StandardScaler)
-- models/label_encoder.pkl (Codificador de classes)
-- models/feature_names.pkl (Nomes das features)
-
-================================================================================
-
-🚀 DEPLOYMENT
-================================================================================
-
-OPÇÃO 1: STREAMLIT CLOUD (Recomendado)
-Passos:
-1. Faça fork do repositório GitHub
-2. Crie conta em streamlit.io
-3. Clique "New App"
-4. Aponte para o repositório
-5. Defina main file: streamlit_app.py
-6. Deploy automático
-
-URL DO APP: https://tech-challenge-4-previsao-obesidade.streamlit.app/
-
-OPÇÃO 2: DEPLOY EM AWS
-- EC2 instance (t2.micro)
-- Install Python, dependências
-- PM2 para gerenciar processo
-- Nginx como reverse proxy
-
-OPÇÃO 3: DEPLOY EM AZURE
-- App Service
-- CI/CD pipeline
-- Auto-scaling habilitado
-
-OPÇÃO 4: DOCKER
-Dockerfile disponível no repositório
-- Build: docker build -t obesity-app .
-- Run: docker run -p 8501:8501 obesity-app
-
-================================================================================
-
-📚 REFERÊNCIAS E DOCUMENTAÇÃO
-================================================================================
-
-NOTEBOOK:
-- Células bem comentadas
-- Explicação de cada etapa
-- Células executáveis
-- Gráficos e visualizações
-
-ANÁLISE:
-- Código Python reproduzível
-- Insights práticos
-- Recomendações clínicas
-
-APLICAÇÃO:
-- Instruções dentro da interface
-- Dicionário de dados integrado
-- Tooltips explicativos
-
-README:
-- Guia de instalação
-- Como executar
-- Explicação de arquitetura
-- Contribuições bem-vindas
-
-================================================================================
-
-✅ REQUISITOS ATENDIDOS
-================================================================================
-
-REQUISITOS DO DESAFIO:
-
-[✓] Pipeline de ML com feature engineering e treinamento
-    → Implementado com 4 estágios de processamento
-    → Feature engineering com 4 novas variáveis criadas
-    → Treinamento de 4 algoritmos diferentes
-
-[✓] Modelo com assertividade acima de 75%
-    → Random Forest: 86.29%
-    → Todos os modelos atuais testados no pipeline sem antropometria
-
-[✓] Deploy em Streamlit
-    → Aplicação funcional e interativa
-    → 4 abas principais de funcionalidades
-    → Pronta para produção
-
-[✓] Análise analítica com insights
-    → Arquivo com análises exploratórias
-    → Insights específicos para equipe médica
-    → Recomendações de protocolo clínico
-
-[✓] Links de compartilhamento
-    → GitHub repository: https://github.com/rafaellccouto/Tech-Challenge-4
-    → Streamlit App: https://tech-challenge-4-previsao-obesidade.streamlit.app/
-    → Dashboard: [URL]
-
-================================================================================
-
-Para dúvidas ou sugestões sobre o sistema:
-- Consulte o README.md
-- Verifique o arquivo 02_Analise_Exploratoria_Insights.md
-- Execute o notebook para entender a lógica
-- Teste a aplicação Streamlit interativamente
-
-================================================================================
-
-VERSÃO: 1.0
-DATA: 2024
-STATUS: ✅ PRONTO PARA PRODUÇÃO
-ACURÁCIA: 86.29%
-
-================================================================================
+```
