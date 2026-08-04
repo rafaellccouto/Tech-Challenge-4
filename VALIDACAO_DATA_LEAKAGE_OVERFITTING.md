@@ -47,7 +47,7 @@
 
 #### Modelo 2: Random Forest ⭐ SELECIONADO
 - **Treino**: 96.21% | **Teste**: 83.22%
-- **GAP**: 12.99% → ⚠ **ALERTA (OVERFITTING)**
+- **GAP**: 12.99% → **ALERTA**
 
 #### Modelo 3: Gradient Boosting
 - **Treino**: 98.82% | **Teste**: 83.22%
