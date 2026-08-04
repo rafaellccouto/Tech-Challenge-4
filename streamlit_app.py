@@ -278,14 +278,18 @@ with tab5:
     # ESPAÇO PARA IMAGENS DO GITHUB
     # Para inserir, utilize: st.image("URL_DA_IMAGEM_NO_GITHUB")
     
-    st.info("Aguardando inserção dos componentes visuais do dashboard.")
+    # st.info("Aguardando inserção dos componentes visuais do dashboard.")
     
     # Exemplos de placeholders (Remova o comentário e preencha os espaços quando tiver as URLs):
-    # st.subheader("nome do dashboard")
-    # st.image("o link dele", caption="a legenda dele")
+
+    st.subheader("Panorama Executivo")
+    st.image("https://github.com/rafaellccouto/Tech-Challenge-4/blob/main/Dashboards/Panorama%20executivo.jpeg", caption="Panorama executivo do projeto")
+
+    st.subheader("Fatores de risco para obesidade")
+    st.image("https://github.com/rafaellccouto/Tech-Challenge-4/blob/main/Dashboards/Fatores%20de%20risco.jpeg", caption="Fatores de risco para obesidade")
     
-    # st.subheader("nome desse outro")
-    # st.image("o link dele", caption="a legenda dele")
+    st.subheader("Performance do Modelo")
+    st.image("https://github.com/rafaellccouto/Tech-Challenge-4/blob/main/Dashboards/Performance.jpeg", caption="Performance do modelo de previsão de obesidade")
     
     #para adicionar mais só repetir os exemplos acima
 # ============================================================================
