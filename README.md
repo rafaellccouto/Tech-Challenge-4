@@ -102,6 +102,7 @@ A aplicação oferece abas de **Previsão** (com cálculo de probabilidade e ní
 
 ## 🔗 Links de Acesso
 - 🌐 **App Streamlit**: [https://tech-challenge-4-previsao-obesidade.streamlit.app/](https://tech-challenge-4-previsao-obesidade.streamlit.app/)
+- 📊 **Dashboard**: [https://github.com/rafaellccouto/Tech-Challenge-4/tree/main/Dashboards](https://github.com/rafaellccouto/Tech-Challenge-4/tree/main/Dashboards)
 - 💻 **Repositório GitHub**: [https://github.com/rafaellccouto/Tech-Challenge-4](https://github.com/rafaellccouto/Tech-Challenge-4)
 
 ## 👨‍💻 Autores

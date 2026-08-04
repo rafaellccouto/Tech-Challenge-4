@@ -282,14 +282,19 @@ with tab5:
     
     # Exemplos de placeholders (Remova o comentário e preencha os espaços quando tiver as URLs):
 
-    st.subheader("Panorama Executivo")
-    st.image("https://github.com/rafaellccouto/Tech-Challenge-4/blob/main/Dashboards/Panorama%20executivo.jpeg", caption="Panorama executivo do projeto")
+    dashboard_images = [
+        ("Panorama Executivo", "Panorama executivo.jpeg", "Panorama executivo do projeto"),
+        ("Fatores de risco para obesidade", "Fatores de risco.jpeg", "Fatores de risco para obesidade"),
+        ("Performance do Modelo", "Performance.jpeg", "Performance do modelo de previsão de obesidade"),
+    ]
 
-    st.subheader("Fatores de risco para obesidade")
-    st.image("https://github.com/rafaellccouto/Tech-Challenge-4/blob/main/Dashboards/Fatores%20de%20risco.jpeg", caption="Fatores de risco para obesidade")
-    
-    st.subheader("Performance do Modelo")
-    st.image("https://github.com/rafaellccouto/Tech-Challenge-4/blob/main/Dashboards/Performance.jpeg", caption="Performance do modelo de previsão de obesidade")
+    for title, filename, caption in dashboard_images:
+        image_path = BASE_DIR / "Dashboards" / filename
+        if image_path.exists():
+            st.subheader(title)
+            st.image(str(image_path), caption=caption, use_container_width=True)
+        else:
+            st.warning(f"Imagem não encontrada: {filename}")
     
     #para adicionar mais só repetir os exemplos acima
 # ============================================================================
