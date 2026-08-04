@@ -81,6 +81,52 @@ def preprocess_user_input(user_data_df, model_features):
     # Reordenar para a ordem exata das colunas do modelo
     return df_encoded[model_features]
 
+def display_dashboard_image(title, filename, caption):
+    image_path = None
+    candidates = [filename]
+
+    path = Path(filename)
+    stem = path.stem
+    suffix = path.suffix.lower()
+
+    if suffix in {"", ".jpeg"}:
+        candidates.extend([f"{stem}.jpg", f"{stem}.jpeg", f"{stem}.JPG", f"{stem}.JPEG"])
+    elif suffix in {".jpg", ".jpeg"}:
+        candidates.extend([filename, filename.replace(suffix, ".jpg"), filename.replace(suffix, ".jpeg")])
+
+    for name in candidates:
+        for base_dir in [BASE_DIR / "Dashboards", BASE_DIR]:
+            candidate = base_dir / name
+            if candidate.exists():
+                image_path = candidate
+                break
+        if image_path is not None:
+            break
+
+    if image_path is None:
+        normalized_query = "".join(ch for ch in stem.lower() if ch.isalnum())
+        for base_dir in [BASE_DIR / "Dashboards", BASE_DIR]:
+            if not base_dir.exists():
+                continue
+            for candidate in base_dir.iterdir():
+                if candidate.is_file() and candidate.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
+                    normalized_candidate = "".join(ch for ch in candidate.stem.lower() if ch.isalnum())
+                    if normalized_query and normalized_query in normalized_candidate:
+                        image_path = candidate
+                        break
+            if image_path is not None:
+                break
+
+    if image_path is None:
+        st.warning(f"Imagem não encontrada: {filename}")
+        return
+
+    st.subheader(title)
+    try:
+        st.image(str(image_path.resolve()), caption=caption, use_container_width=True)
+    except Exception as e:
+        st.error(f"Não foi possível exibir {filename}: {e}")
+
 # ============================================================================
 # INTERFACE PRINCIPAL
 # ============================================================================
@@ -283,18 +329,13 @@ with tab5:
     # Exemplos de placeholders (Remova o comentário e preencha os espaços quando tiver as URLs):
 
     dashboard_images = [
-        ("Panorama Executivo", "Panorama executivo.jpeg", "Panorama executivo do projeto"),
-        ("Fatores de risco para obesidade", "Fatores de risco.jpeg", "Fatores de risco para obesidade"),
-        ("Performance do Modelo", "Performance.jpeg", "Performance do modelo de previsão de obesidade"),
+        ("Panorama Executivo", "Panorama Executivo.jpg", "Panorama executivo do projeto"),
+        ("Fatores de risco para obesidade", "Fatores de risco para obesidade.jpg", "Fatores de risco para obesidade"),
+        ("Performance do Modelo", "Performance do Modelo.jpg", "Performance do modelo de previsão de obesidade"),
     ]
 
     for title, filename, caption in dashboard_images:
-        image_path = BASE_DIR / "Dashboards" / filename
-        if image_path.exists():
-            st.subheader(title)
-            st.image(str(image_path), caption=caption, use_container_width=True)
-        else:
-            st.warning(f"Imagem não encontrada: {filename}")
+        display_dashboard_image(title, filename, caption)
     
     #para adicionar mais só repetir os exemplos acima
 # ============================================================================
